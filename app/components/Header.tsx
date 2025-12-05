@@ -41,8 +41,33 @@ export default function Header() {
   const menuItems = [
     { 
       name: language === 'es' ? 'OFICINAS' : 'OFFICES',
-      href: `/${language}/oficinas`,
-      type: 'link'
+      href: '', // Vacío porque ahora es dropdown
+      type: 'dropdown', // CAMBIADO A DROPDOWN
+      key: 'oficinas',
+      submenu: language === 'es'
+        ? [
+            { name: 'Los Ángeles', href: `/${language}/oficinas/abogados-inmigracion-los-angeles` },
+            { name: 'Arvada', href: `/${language}/oficinas/arvada` },
+            { name: 'Chicago', href: `/${language}/oficinas/chicago` },
+            { name: 'Dallas', href: `/${language}/oficinas/dallas` },
+            { name: 'El Paso', href: `/${language}/oficinas/el-paso` },
+            { name: 'Harlingen', href: `/${language}/oficinas/harlingen` },
+            { name: 'Houston Bellaire', href: `/${language}/oficinas/houston-bellaire` },
+            { name: 'Houston Oficina Principal', href: `/${language}/oficinas/houston-principal-office` },
+            { name: 'Memphis', href: `/${language}/oficinas/memphis` },
+        ]
+        : [
+            { name: 'View All', href: `/${language}/oficinas` },
+            { name: 'Los Angeles', href: `/${language}/oficinas/abogados-inmigracion-los-angeles` },
+            { name: 'Arvada', href: `/${language}/oficinas/arvada` },
+            { name: 'Chicago', href: `/${language}/oficinas/chicago` },
+            { name: 'Dallas', href: `/${language}/oficinas/dallas` },
+            { name: 'El Paso', href: `/${language}/oficinas/el-paso` },
+            { name: 'Harlingen', href: `/${language}/oficinas/harlingen` },
+            { name: 'Houston Bellaire', href: `/${language}/oficinas/houston-bellaire` },
+            { name: 'Houston Principal Office', href: `/${language}/oficinas/houston-principal-office` },
+            { name: 'Memphis', href: `/${language}/oficinas/memphis` },
+        ]
     },
     { 
       name: language === 'es' ? 'ÁREAS LEGALES' : 'LEGAL AREAS',
@@ -123,7 +148,7 @@ export default function Header() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Aumenté el padding vertical a py-4 en móvil y py-5 en desktop.
-           Esto le da más "cuerpo" sin ser excesivo.
+            Esto le da más "cuerpo" sin ser excesivo.
         */}
         <div className="flex items-center justify-between py-4 lg:py-5 transition-all duration-300"> 
           

@@ -1,7 +1,7 @@
 import React from 'react';
-import Header from '../../components/Header'; // Ajusta la ruta según tu estructura
-import Footer from '../../components/Footer'; // Ajusta la ruta según tu estructura
-import Office from '../../components/Office'; // Importamos el componente nuevo
+import Header from '../../components/Header';
+import Footer from '../../components/Footer'; 
+import Office from '../../components/Office'; 
 
 export default function OficinasPage() {
   return (
