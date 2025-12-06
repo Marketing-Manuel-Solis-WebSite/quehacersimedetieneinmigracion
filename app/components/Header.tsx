@@ -55,6 +55,11 @@ export default function Header() {
             { name: 'Houston Bellaire', href: `/${language}/oficinas/houston-bellaire` },
             { name: 'Houston Oficina Principal', href: `/${language}/oficinas/houston-principal-office` },
             { name: 'Memphis', href: `/${language}/oficinas/memphis` },
+            { name: 'Kirby', href: `/${language}/oficinas/kirby-houston` },
+            { name: 'NorthChase', href: `/${language}/oficinas/northchase-houston` },
+            { name: 'Loop', href: `/${language}/oficinas/loop-houston` },
+            { name: 'Airways', href: `/${language}/oficinas/airways` },
+            { name: 'Main Houston', href: `/${language}/oficinas/main-houston` },
         ]
         : [
             { name: 'View All', href: `/${language}/oficinas` },
