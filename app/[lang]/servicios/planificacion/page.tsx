@@ -15,15 +15,14 @@ export default function NewsComingSoon() {
       <Header />
 
       {/* --- CONTENIDO PRINCIPAL --- */}
-      {/* CAMBIO AQUI: Aumenté pt-36 a md:pt-44 para bajar el contenido y que no choque con el header */}
       <main className="flex-grow flex items-center justify-center relative pt-36 md:pt-44 pb-20 px-4">
         
-        {/* 1. FONDO ANIMADO MEJORADO (Más "Wow") */}
-        <div className="absolute inset-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-            {/* Luz central profunda */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] bg-[#003366] rounded-full mix-blend-screen filter blur-[150px] opacity-40 animate-pulse-slow"></div>
+        {/* 1. FONDO ANIMADO MEJORADO Y OPTIMIZADO */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden z-0 pointer-events-none transform-gpu">
+            {/* Luz central profunda - Optimizado: Blur reducido */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] bg-[#003366] rounded-full mix-blend-screen filter blur-[80px] opacity-40 animate-pulse-slow"></div>
             
-            {/* NUEVO: Patrón de Red Geométrica y Líneas de Construcción */}
+            {/* Patrón de Red Geométrica */}
             <svg className="absolute inset-0 w-full h-full opacity-[0.15]" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                     <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
@@ -45,7 +44,7 @@ export default function NewsComingSoon() {
                 />
             </svg>
 
-            {/* Partículas Doradas Flotantes (Se mantienen) */}
+            {/* Partículas Doradas Flotantes - Optimizado con will-change */}
             {[...Array(15)].map((_, i) => (
                 <motion.div
                     key={i}
@@ -69,17 +68,18 @@ export default function NewsComingSoon() {
                     style={{
                         width: Math.random() * 5 + 3 + 'px',
                         height: Math.random() * 5 + 3 + 'px',
+                        willChange: "transform, opacity" // Optimización
                     }}
                 />
             ))}
         </div>
 
-        {/* 2. TARJETA CENTRAL (Glassmorphism) */}
+        {/* 2. TARJETA CENTRAL - Optimizado: Blur reducido */}
         <motion.div 
             initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.8, type: "spring", delay: 0.2 }}
-            className="relative z-10 w-full max-w-3xl bg-[#001a33]/60 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 md:p-14 text-center shadow-2xl ring-1 ring-[#B2904D]/20"
+            className="relative z-10 w-full max-w-3xl bg-[#001a33]/80 backdrop-blur-md border border-white/10 rounded-3xl p-8 md:p-14 text-center shadow-2xl ring-1 ring-[#B2904D]/20"
         >
             {/* Decoración superior de la tarjeta */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[2px] bg-gradient-to-r from-transparent via-[#B2904D] to-transparent opacity-70"></div>
@@ -90,15 +90,17 @@ export default function NewsComingSoon() {
                     initial={{ rotate: -10 }}
                     animate={{ rotate: 10 }}
                     transition={{ duration: 5, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-                    className="relative z-10 bg-gradient-to-br from-[#002342] to-[#00152b] p-6 rounded-full border-[3px] border-[#B2904D] shadow-[0_0_35px_rgba(178,144,77,0.4)]"
+                    style={{ willChange: "transform" }}
+                    className="relative z-10 bg-gradient-to-br from-[#002342] to-[#00152b] p-6 rounded-full border-[3px] border-[#B2904D] shadow-[0_0_25px_rgba(178,144,77,0.3)]"
                 >
                     <Newspaper size={64} className="text-white/90" />
                     
-                    {/* Martillo y Brújula animados (Nuevo icono añadido) */}
+                    {/* Martillo y Brújula animados */}
                     <motion.div 
                         className="absolute -right-5 -top-2 bg-[#B2904D] p-2 rounded-full text-[#002342] shadow-lg"
                         animate={{ rotate: [0, 30, 0], scale: [1, 1.1, 1] }}
                         transition={{ duration: 2, repeat: Infinity }}
+                        style={{ willChange: "transform" }}
                     >
                         <Hammer size={22} />
                     </motion.div>
@@ -127,7 +129,7 @@ export default function NewsComingSoon() {
                 transition={{ delay: 0.6 }}
                 className="text-base md:text-lg text-gray-300 mb-10 max-w-xl mx-auto leading-relaxed font-light"
             >
-                Nuestra sección de <strong>Planificación Familiar</strong> está bajo una reconstrucción estratégica. 
+                Nuestra sección de <strong>Noticias y Blog</strong> está bajo una reconstrucción estratégica. 
                 Pronto encontrará aquí análisis jurídicos profundos y actualizaciones migratorias esenciales.
             </motion.p>
 
@@ -139,13 +141,14 @@ export default function NewsComingSoon() {
                 </div>
                 
                 {/* Contenedor de la barra */}
-                <div className="h-3 w-full bg-[#001021] rounded-full overflow-hidden relative border border-white/10 box-shadow-inner">
-                    {/* Barra de relleno animada */}
+                <div className="h-3 w-full bg-[#001021] rounded-full overflow-hidden relative border border-white/10">
+                    {/* Barra de relleno animada - Optimizado */}
                     <motion.div 
                         className="h-full bg-gradient-to-r from-[#B2904D] to-[#d4af67] absolute top-0 left-0 rounded-full relative overflow-hidden"
                         initial={{ width: "0%" }}
-                        animate={{ width: "26%" }} /* CAMBIO: Ajustado al 26% */
+                        animate={{ width: "26%" }}
                         transition={{ duration: 1.5, ease: "easeOut", delay: 0.8 }}
+                        style={{ willChange: "width" }}
                     >
                          {/* Brillo intenso en la punta de la barra */}
                          <div className="absolute right-0 top-0 h-full w-[5px] bg-white blur-[3px]"></div>
@@ -156,6 +159,7 @@ export default function NewsComingSoon() {
                         className="absolute top-0 bottom-0 w-10 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12"
                         animate={{ x: [-50, 450] }}
                         transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                        style={{ willChange: "transform" }}
                     />
                 </div>
             </div>
@@ -184,20 +188,22 @@ export default function NewsComingSoon() {
 
         </motion.div>
 
-        {/* Elementos decorativos flotantes del fondo */}
+        {/* Elementos decorativos flotantes del fondo - Optimizado */}
         <motion.div 
             animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            style={{ willChange: "transform" }}
             className="absolute bottom-20 left-10 opacity-20 hidden lg:block pointer-events-none"
         >
-            <Construction size={120} className="text-[#B2904D] blur-[2px]" />
+            <Construction size={120} className="text-[#B2904D] blur-[1px]" />
         </motion.div>
         <motion.div 
             animate={{ y: [0, 15, 0], rotate: [0, -5, 0] }}
             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+            style={{ willChange: "transform" }}
             className="absolute top-40 right-10 opacity-10 hidden lg:block pointer-events-none"
         >
-            <HardHat size={100} className="text-white blur-[2px]" />
+            <HardHat size={100} className="text-white blur-[1px]" />
         </motion.div>
 
       </main>

@@ -4,10 +4,18 @@ import React from 'react';
 import Link from 'next/link';
 import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
-import { useLanguage } from '../../../context/LanguageContext'; // Asegúrate de que esta ruta sea correcta
+import { useLanguage } from '../../../context/LanguageContext'; 
+import { motion, Variants } from 'framer-motion';
+import { Outfit } from 'next/font/google'; 
+import { BookOpen, Calendar, User } from 'lucide-react'; 
+
+// --- FUENTE ---
+const font = Outfit({ 
+  subsets: ['latin'], 
+  weight: ['100', '300', '400', '500', '700'] 
+});
 
 // --- FUNCIÓN AUXILIAR PARA OBTENER EL TEXTO TRADUCIDO ---
-// Necesitas esta función para manejar las traducciones anidadas en el objeto 'texts'
 const getTranslatedText = (key: string, lang: 'es' | 'en') => {
   const parts = key.split('.');
   let current: any = texts;
@@ -18,11 +26,10 @@ const getTranslatedText = (key: string, lang: 'es' | 'en') => {
       return ''; 
     }
   }
-  // Intenta devolver el idioma solicitado, si no existe, usa español como fallback.
   return current[lang] || current.es;
 };
 
-// --- DATOS BILINGÜES COMPLETOS ---
+// --- DATOS BILINGÜES COMPLETOS (Mantenidos) ---
 const texts = {
   header: {
     library: { es: 'Biblioteca Legal', en: 'Legal Library' },
@@ -35,7 +42,6 @@ const texts = {
   article: {
     tag: { es: 'Artículo Legal', en: 'Legal Article' },
     read_full: { es: 'Leer artículo completo', en: 'Read Full Article' },
-    // Días y meses deben ser traducidos por Next.js/date-fns, pero aquí centralizamos los datos
   },
   articles: [
     {
@@ -46,8 +52,8 @@ const texts = {
       date: { es: "febrero 18, 2025", en: "February 18, 2025" },
       isoDate: "2025-02-18",
       excerpt: {
-        es: "El Bufete del Abogado Manuel Solis destaca que todos los inmigrantes, sin importar su estatus migratorio, tienen derechos fundamentales protegidos en EE.UU. Es clave conocer estos derechos para defenderse ante situaciones adversas.",
-        en: "The Law Offices of Attorney Manuel Solis emphasize that all immigrants, regardless of their immigration status, have fundamental rights protected in the U.S. It is key to know these rights to defend oneself against adverse situations.",
+        es: "El Bufete del Abogado Manuel Solís destaca que todos los inmigrantes, sin importar su estatus migratorio, tienen derechos fundamentales protegidos en EE.UU. Es clave conocer estos derechos para defenderse ante situaciones adversas.",
+        en: "The Law Offices of Attorney Manuel Solís emphasize that all immigrants, regardless of their immigration status, have fundamental rights protected in the U.S. It is key to know these rights to defend oneself against adverse situations.",
       }
     },
     {
@@ -134,11 +140,6 @@ const texts = {
         en: "Requirements: Bachelor of Science in Management Information Systems required. 40 hours per week. Monday through Friday: 9:00 a.m. to 5:00 p.m.",
       }
     },
-    // Nota: Las siguientes entradas se han dejado en español solo porque su contenido no es de Ley de Inmigración,
-    // y para un componente de traducción dinámica se traducirían de la misma manera que las anteriores,
-    // usando un objeto { es: "...", en: "..." } en title, date y excerpt.
-    // Para simplificar, asumo que las entradas de abajo deben tener su contenido original si no hay traducción definida.
-    // En un caso real, necesitarías agregar los objetos de traducción para cada campo.
     {
       id: 6555,
       title: { es: "Negligencia Medica", en: "Medical Malpractice" },
@@ -291,7 +292,7 @@ const texts = {
       date: { es: "noviembre 14, 2020", en: "November 14, 2020" },
       isoDate: "2020-11-14",
       excerpt: {
-        es: "¿Votó en las elecciones que acabamos de tener? Si su respuesta es sí … ¡felicidades! Su voto tiene poder. De hecho, En 2020, los hispanos ahora son la “minoría” con la mayor cantidad de votantes en los Estados Unidos.",
+        es: "¿Votó en las elecciones que acabamos de tener? Si su respuesta es sí … ¡felicidades! Su voto tiene poder. De hecho, En 2020, los hispanos ahora son la minoría con la mayor cantidad de votantes en los Estados Unidos.",
         en: "Did you vote in the elections we just had? If your answer is yes... congratulations! Your vote has power. In fact, in 2020, Hispanics are now the 'minority' with the highest number of voters in the United States.",
       }
     },
@@ -453,7 +454,7 @@ const texts = {
     },
     {
       id: 6345,
-      title: { es: "“SUEÑO Y PROMESA” PODRÍA SER EL CAMINO A LA LEGALIZACIÓN DEFINITIVA DE LOS DACA", en: "“DREAM AND PROMISE” COULD BE THE PATH TO DEFINITIVE LEGALIZATION FOR DACA RECIPIENTS" },
+      title: { es: "SUEÑO Y PROMESA PODRÍA SER EL CAMINO A LA LEGALIZACIÓN DEFINITIVA DE LOS DACA", en: "DREAM AND PROMISE COULD BE THE PATH TO DEFINITIVE LEGALIZATION FOR DACA RECIPIENTS" },
       url: "/proteccion-legal-para-migrantes/sueno-y-promesa-podria-ser-el-camino-a-la-legalizacion-definitiva-de-los-daca",
       author: "Raul Zepeda",
       date: { es: "marzo 17, 2020", en: "March 17, 2020" },
@@ -555,8 +556,8 @@ const texts = {
       date: { es: "marzo 17, 2020", en: "March 17, 2020" },
       isoDate: "2020-03-17",
       excerpt: {
-        es: "Las Oficinas Legales de Manuel Solis ahora buscan ayudar a las personas que han sido afectadas o creen que pudieron haber sido afectadas por el reciente Intercontinental Terminal Company (ITC) Incidente de una planta en Deer Park.",
-        en: "The Law Offices of Manuel Solis are now looking to help people who have been affected or believe they may have been affected by the recent Intercontinental Terminal Company (ITC) plant incident in Deer Park.",
+        es: "Las Oficinas Legales de Manuel Solís ahora buscan ayudar a las personas que han sido afectadas o creen que pudieron haber sido afectadas por el reciente Intercontinental Terminal Company (ITC) Incidente de una planta en Deer Park.",
+        en: "The Law Offices of Manuel Solís are now looking to help people who have been affected or believe they may have been affected by the recent Intercontinental Terminal Company (ITC) plant incident in Deer Park.",
       }
     },
     {
@@ -670,73 +671,196 @@ const texts = {
   ]
 };
 
+// --- VARIANTS para Framer Motion ---
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 50, scale: 0.8 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 10,
+    }
+  },
+};
+
+// --- COMPONENTE DE PÁGINA ---
 export default function ProteccionLegalPage() {
   const { language } = useLanguage(); 
+  const lang = language as 'es' | 'en';
 
-  const t = (key: string) => getTranslatedText(key, language as 'es' | 'en');
+  const t = (key: string) => getTranslatedText(key, lang);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 font-sans">
+    <div className={`min-h-screen w-full bg-[#001540] text-white ${font.className}`}>
+      
       <Header />
 
-      <main className="flex-grow pt-42 pb-20 px-4 sm:px-6 lg:px-8">
-        
-        <div className="max-w-7xl mx-auto mb-16 text-center">
-          <span className="block text-sm font-bold tracking-widest text-yellow-600 uppercase mb-2">
-            {t('header.library')}
-          </span>
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4 tracking-tight">
-            {t('header.title')}
-          </h1>
-          <div className="w-24 h-1 bg-yellow-600 mx-auto rounded-full"></div>
-          <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
-            {t('header.subtitle')}
-          </p>
-        </div>
+      {/* =========================================================================
+          FONDO ANIMADO (Fixed - Cubre toda la página)
+      ========================================================================= */}
+      <div className="fixed inset-0 z-0 w-full h-full bg-[#001540] overflow-hidden">
+          {/* Gradiente Azul Profundo */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#002868] via-[#001540] to-[#000a20]" />
+          
+          {/* Ruido de textura */}
+          <div className="absolute inset-0 opacity-[0.06] mix-blend-overlay" style={{ backgroundImage: 'url(/noise.png)', backgroundRepeat: 'repeat' }}></div>
 
-        <div className="max-w-7xl mx-auto grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {texts.articles.map((article) => (
-            <Link href={article.url} key={article.id} className="group">
-              <article className="h-full flex flex-col bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:border-yellow-500/30 relative">
-                
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-900 to-blue-700 transform origin-left transition-transform duration-300 group-hover:scale-x-100 scale-x-0"></div>
+          {/* Orbes de luz con movimiento suave - CONTENIDOS */}
+          <motion.div 
+            animate={{ 
+              opacity: [0.3, 0.5, 0.3], 
+              scale: [1, 1.2, 1], 
+              x: [0, 50, 0], 
+              y: [0, -30, 0] 
+            }}
+            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-blue-600/10 rounded-full blur-[120px]" 
+          />
+          <motion.div 
+             animate={{ 
+               opacity: [0.2, 0.4, 0.2], 
+               scale: [1, 1.3, 1], 
+               x: [0, -40, 0],
+               y: [0, 40, 0]
+             }}
+             transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+             className="absolute bottom-[-10%] left-[-10%] w-[50vw] h-[50vw] max-w-[700px] max-h-[700px] bg-sky-800/10 rounded-full blur-[150px]" 
+          />
+          
+          {/* Texto de Fondo Sutil - CONTENIDO */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none select-none overflow-hidden">
+            <motion.span
+              initial={{ x: "20%" }} 
+              animate={{ x: "-20%" }} 
+              transition={{ 
+                duration: 60, 
+                repeat: Infinity, 
+                ease: "linear", 
+                repeatType: "mirror"
+              }}
+              className="text-[60vh] font-black italic text-white tracking-tighter whitespace-nowrap"
+            >
+                LEGAL
+            </motion.span>
+          </div>
+      </div>
 
-                <div className="p-8 flex flex-col flex-grow">
-                  <div className="flex items-center gap-2 mb-4 text-xs font-semibold text-yellow-600 uppercase tracking-wider">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
-                    {t('article.tag')}
-                  </div>
+      {/* MAIN CONTENT - Con overflow-x-hidden y contenido centrado */}
+      <main className="relative z-10 w-full overflow-x-hidden">
+        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-50 pb-20">
+          
+          {/* --- HERO/HEADER SECTION --- */}
+          <div className="w-full mb-20 text-center">
+            <motion.span 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-block text-sm font-bold tracking-widest text-[#B2904D] uppercase mb-4 drop-shadow-[0_0_10px_rgba(178,144,77,0.3)]"
+            >
+              {t('header.library')}
+            </motion.span>
 
-                  <h2 className="text-2xl font-serif font-bold text-gray-900 mb-4 leading-tight group-hover:text-blue-800 transition-colors">
-                    {article.title[language]}
-                  </h2>
+            <motion.h1 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-white mb-4 tracking-tighter leading-tight px-4"
+            >
+              <span className="font-extrabold text-[#B2904D] drop-shadow-lg">{t('header.title').split(' ')[0]}</span>
+              <span className="block text-white/90">{t('header.title').split(' ').slice(1).join(' ')}</span>
+            </motion.h1>
+            
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: '6rem' }}
+              transition={{ duration: 1, delay: 0.8 }}
+              className="h-1 bg-gradient-to-r from-[#002868] to-[#B2904D] mx-auto rounded-full mt-6"
+            ></motion.div>
+            
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="mt-8 text-lg sm:text-xl text-blue-100/70 max-w-3xl mx-auto font-light leading-relaxed px-4"
+            >
+              {t('header.subtitle')}
+            </motion.p>
+          </div>
 
-                  <p className="text-gray-600 mb-6 line-clamp-3 leading-relaxed flex-grow">
-                    {article.excerpt[language]}
-                  </p>
+          {/* --- GRID DE ARTÍCULOS --- */}
+          <motion.div 
+            className="w-full grid gap-8 sm:gap-10 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.01 }} 
+          >
+            {texts.articles.map((article) => (
+              <motion.div key={article.id} variants={itemVariants} className="w-full">
+                <Link href={article.url} className="group h-full block">
+                  <article className="h-full flex flex-col bg-[#000814]/60 rounded-xl border border-white/10 overflow-hidden transition-all duration-500 hover:shadow-[0_0_40px_rgba(178,144,77,0.3)] hover:scale-[1.03] relative backdrop-blur-sm">
+                    
+                    {/* Borde Superior Animado (Dorado) */}
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#B2904D] to-transparent transform origin-center transition-all duration-500 group-hover:scale-x-100 scale-x-0"></div>
 
-                  <div className="pt-6 mt-auto border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    <div className="p-6 sm:p-8 flex flex-col flex-grow">
+                      <div className="flex items-center gap-2 mb-4 text-xs font-semibold text-[#B2904D] uppercase tracking-widest">
+                        <BookOpen size={16} className="text-[#B2904D] flex-shrink-0" />
+                        <span className="truncate">{t('article.tag')}</span>
                       </div>
-                      <span className="font-medium text-gray-700">{article.author}</span>
-                    </div>
-                    <time dateTime={article.isoDate} className="text-gray-400 font-medium text-xs">
-                      {article.date[language]}
-                    </time>
-                  </div>
-                </div>
 
-                <div className="bg-gray-50 px-8 py-3 flex items-center justify-between group-hover:bg-blue-50 transition-colors duration-300">
-                  <span className="text-sm font-bold text-blue-900 group-hover:text-blue-700">
-                    {t('article.read_full')}
-                  </span>
-                  <svg className="w-5 h-5 text-blue-900 transform transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                </div>
-              </article>
-            </Link>
-          ))}
+                      <h2 className="text-xl sm:text-2xl font-normal text-white mb-4 leading-snug group-hover:text-[#B2904D] transition-colors drop-shadow-[0_0_5px_rgba(255,255,255,0.1)] flex-grow">
+                        {article.title[lang]}
+                      </h2>
+
+                      <p className="text-blue-100/70 mb-6 line-clamp-3 leading-relaxed text-sm font-light">
+                        {article.excerpt[lang]}
+                      </p>
+
+                      <div className="pt-4 mt-auto border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between text-sm text-white/50 gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <User size={16} className="text-[#002868] fill-[#B2904D]/30 flex-shrink-0" />
+                          <span className="font-light text-white/80 truncate">{article.author}</span>
+                        </div>
+                        <time dateTime={article.isoDate} className="flex items-center gap-1 text-white/40 font-medium text-xs whitespace-nowrap">
+                          <Calendar size={14} className="text-white/30 flex-shrink-0" />
+                          {article.date[lang]}
+                        </time>
+                      </div>
+                    </div>
+
+                    {/* Pie de tarjeta para leer más */}
+                    <div className="bg-[#000510]/80 px-6 sm:px-8 py-4 flex items-center justify-between group-hover:bg-[#002868]/70 transition-colors duration-300 border-t border-white/10">
+                      <span className="text-sm font-medium text-[#B2904D] group-hover:text-white transition-colors truncate">
+                        {t('article.read_full')}
+                      </span>
+                      <motion.svg 
+                        className="w-5 h-5 text-[#B2904D] transform transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white flex-shrink-0 ml-2" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                      </motion.svg>
+                    </div>
+                </article>
+              </Link>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </main>
 

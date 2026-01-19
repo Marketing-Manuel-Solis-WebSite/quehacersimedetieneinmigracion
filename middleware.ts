@@ -47,6 +47,9 @@ export function middleware(request: NextRequest) {
   // Redireccionar a la ruta con locale
   const locale = getLocale(request);
   const newUrl = new URL(`/${locale}${pathname}`, request.url);
+
+  // --- CORRECCIÓN AQUÍ: Copiar los parámetros de búsqueda (UTMs) ---
+  newUrl.search = request.nextUrl.search;
   
   const response = NextResponse.redirect(newUrl);
   response.cookies.set('NEXT_LOCALE', locale, { maxAge: 31536000 }); // 1 año
@@ -56,7 +59,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Skip all internal paths (_next, api, static files)
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // CORREGIDO: Se agregó "|_vercel" para que analytics funcione
+    '/((?!api|_next/static|_next/image|_vercel|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

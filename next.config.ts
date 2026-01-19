@@ -11,6 +11,13 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'manuelsolis.com',
       },
+      // ✅ CORRECCIÓN: Este es el dominio nuevo que te dio el error
+      {
+        protocol: 'https',
+        hostname: 'uenjwzjx3vckezns.public.blob.vercel-storage.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   // Configuración para i18n

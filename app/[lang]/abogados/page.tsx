@@ -1,43 +1,31 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, Play, Award, BookOpen, Scale, 
-  ChevronRight, Mail, ShieldCheck, 
-  Gavel, GraduationCap, ArrowRight
+  Scale, ShieldCheck, Gavel, GraduationCap, 
+  ArrowRight, X as CloseIcon, Mail, Award, ChevronRight
 } from 'lucide-react';
 import Image from 'next/image';
 import Header from '../../components/Header'; 
 import Footer from '../../components/Footer';
 import { useLanguage } from '../../context/LanguageContext';
 
-// Función auxiliar para manejar URLs de imágenes
-const getImageURL = (name: string) => {
-    const base = 'https://manuelsolis.com/wp-content/uploads/2025/07/';
-    const slug = name.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s/g, '-');
-    const suffixes = ['-922x1024.png', '.png', '-1.png', '-921x1024.png'];
-    for (const suffix of suffixes) {
-        if (name.includes('Manuel E. Solís III')) return `${base}Manuel-E.Solis-III-922x1024.png`;
-        if (name.includes('Eduardo García')) return `${base}Eduardo-Garcia-1-922x1024.png`;
-        if (name.includes('Magdalena')) return `${base}Maggie-922x1024.png`;
-        if (name.includes('Himani')) return `${base}Himani-Augustina-Vithanage-922x1024.png`;
-        return `${base}${slug}${suffix}`;
-    }
-    return '/placeholder-lawyer.jpg';
-};
+// --- COLORES ---
+const PRIMARY_DARK = '#001540';
+const ACCENT_GOLD = '#B2904D';
 
+// Array de abogados con URLs actualizadas de Vercel Blob
 const attorneys = [
   // --- FUNDADORES Y SOCIOS PRINCIPALES ---
   {
     id: 'manuel-solis',
     name: 'Manuel Solís',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Manuel%20Solis.png',
     role: {
       es: 'Abogado Principal y Fundador',
       en: 'Principal Attorney and Founder'
     },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Manuel-Solis-922x1024.png', 
-    video: null, 
     bio: {
       es: [
         "Durante las casi tres décadas que han pasado desde que empecé a trabajar como abogado, he llegado a conocer bien a los inmigrantes. Sobretodo he podido ser testigo del impresionante coraje y valentía que muestran muchos de ellos.",
@@ -58,17 +46,16 @@ const attorneys = [
   {
     id: 'manuel-solis-iii',
     name: 'Manuel E. Solís III',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Manuel%20E%20Solis%20III.png',
     role: { es: 'Abogado', en: 'Attorney' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Manuel-E.Solis-III-922x1024.png',
-    video: 'https://manuelsolis.com/wp-content/uploads/2023/12/interview-manuel-iii_1.mp4',
     bio: {
       es: [
         "Manuel E. Solís III se ocupa principalmente de la ley de inmigración en las Oficinas Legales de Manuel Solís. Se graduó de la Universidad de Houston Downtown y completó su licenciatura en derecho en South Texas College of Law Houston.",
-        "El Sr. Solís es un apasionado de ayudar a la comunidad y a las personas necesitadas."
+        "El Abogado Manuel Solís III es un apasionado de ayudar a la comunidad y a las personas necesitadas."
       ],
       en: [
         "Manuel E. Solís III primarily handles immigration law at the Law Offices of Manuel Solís. He graduated from the University of Houston Downtown and completed his law degree at South Texas College of Law Houston.",
-        "Mr. Solís is passionate about helping the community and people in need."
+        "Manuel E. Solís III is passionate about helping the community and people in need."
       ]
     },
     education: ["Universidad de Houston Downtown", "South Texas College of Law Houston"],
@@ -81,9 +68,8 @@ const attorneys = [
   {
     id: 'juan-solis',
     name: 'Juan Solís',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Juan%20Solis.png',
     role: { es: 'Abogado', en: 'Attorney' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Juan-Solis-922x1024.png', 
-    video: 'https://manuelsolis.com/wp-content/uploads/2023/12/pexels-john-hill-7049943-1080p.mp4', 
     bio: {
       es: [
         "Juan representa clientes en casos que van desde Inmigración hasta Litigios Civiles, y está muy involucrado en el departamento de Litigios de Seguros.",
@@ -106,9 +92,8 @@ const attorneys = [
   {
     id: 'andrew-fink',
     name: 'Andrew Fink',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Andrew%20Fink.png',
     role: { es: 'Socio de Litigio (Chicago)', en: 'Litigation Partner (Chicago)' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Andrew-Fink-922x1024.png',
-    video: 'https://manuelsolis.com/wp-content/uploads/2023/12/andrew-fink_1.mp4',
     bio: {
       es: [
         "Socio de litigio a nivel nacional. Centra su práctica en lesiones personales, accidentes y negligencia médica. Ha sido el abogado principal en aproximadamente 50 juicios con jurado.",
@@ -129,9 +114,8 @@ const attorneys = [
   {
     id: 'gregory-finney',
     name: 'Gregory Finney',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Gregory%20Finney.png',
     role: { es: 'Director de Litigio Civil', en: 'Civil Litigation Director' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Gregory-Finney-922x1024.png',
-    video: 'https://SolisPullZone.b-cdn.net/gregory-finney.mp4',
     bio: {
       es: [
         "Gregory Finney es el Director de Litigio Civil. Su experiencia incluye litigios comerciales complejos, fraude, energía y accidentes catastróficos.",
@@ -155,9 +139,8 @@ const attorneys = [
   {
     id: 'ni-yan',
     name: 'Ni Yan',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Ni%20Yan.png',
     role: { es: 'Abogada', en: 'Attorney' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Ni-Yan-922x1024.png',
-    video: 'https://manuelsolis.com/wp-content/uploads/2023/12/ni-yan_1.mp4',
     bio: {
       es: [
         "Nacida en la República de China, Yan se especializa en ayudar a la comunidad asiática en casos de inmigración. Ha representado a más de 5,000 casos.",
@@ -178,9 +161,8 @@ const attorneys = [
   {
     id: 'mark-mcbroom',
     name: 'Mark McBroom',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Mark%20McBroom.png',
     role: { es: 'Abogado', en: 'Attorney' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Mark-McBroom-922x1024.png',
-    video: 'https://manuelsolis.com/wp-content/uploads/2023/12/INTERVIEW-MARC_1.mp4',
     bio: {
       es: [
         "El Sr. McBroom obtuvo su Doctorado en Jurisprudencia de la Universidad Metodista del Sur. Se dio cuenta de su pasión por las leyes de inmigración mientras era estudiante.",
@@ -201,9 +183,8 @@ const attorneys = [
   {
     id: 'ana-patricia-rueda',
     name: 'Ana Patricia Rueda',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Ana%20Patricia%20Rueda.png',
     role: { es: 'Abogada', en: 'Attorney' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Ana-Patricia-Rueda-922x1024.png',
-    video: 'https://manuelsolis.com/wp-content/uploads/2023/12/INTERVIEW-ANA_1.mp4',
     bio: {
       es: [
         "La abogada Rueda nació en Zacatecas, México, e inmigró a los 7 años. Descubrió su pasión por la justicia durante sus estudios universitarios.",
@@ -224,9 +205,8 @@ const attorneys = [
   {
     id: 'edwin-zavala',
     name: 'Edwin Zavala',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Edwin%20Zavala.png',
     role: { es: 'Abogado', en: 'Attorney' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Edwin-Zavala-922x1024.png',
-    video: 'https://SolisPullZone.b-cdn.net/gregory-finney.mp4',
     bio: {
       es: [
         "Edwin Zavala nació y creció en Metairie, Louisiana. Obtuvo su título de Juris Doctor de la Facultad de Derecho de la Universidad de Loyola en Nueva Orleans, graduándose cum laude.",
@@ -247,9 +227,8 @@ const attorneys = [
   {
     id: 'alejandro-manzano',
     name: 'Alejandro Manzano',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Alejandro.png',
     role: { es: 'Abogado', en: 'Attorney' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Alejandro-Manzano-922x1024.png',
-    video: null,
     bio: {
       es: [
         "Comprometido con la comunidad inmigrante, Alejandro ejerce en la oficina de Houston. Creció en el Valle del Río Grande, fortaleciendo su conexión con las comunidades que defiende.",
@@ -278,9 +257,8 @@ const attorneys = [
   {
     id: 'victor-rojas',
     name: 'Victor Rojas',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Victor%20Rojas.png',
     role: { es: 'Abogado', en: 'Attorney' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Victor-Rojas-922x1024.png',
-    video: 'https://SolisPullZone.b-cdn.net/interview-victor.mp4',
     bio: {
       es: [
         "Rojas se graduó de la Facultad de Derecho La Interamericana de Puerto Rico en 2003. Fue Defensor Público por varios años, luchando día tras día para que las ruedas de la Justicia no se descarrilen.",
@@ -304,9 +282,8 @@ const attorneys = [
   {
     id: 'austen-gunnels',
     name: 'Austen Gunnels',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Austen%20Gunnels.png',
     role: { es: 'Abogado', en: 'Attorney' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/08/Austen-Gunnels-921x1024.png',
-    video: null,
     bio: {
       es: [
         "Su práctica se enfoca en representar heridos en accidentes marítimos y de vehículos de motor. Tiene experiencia previa en defensa de seguros, lo que le da una ventaja estratégica al negociar.",
@@ -334,9 +311,8 @@ const attorneys = [
   {
     id: 'gabriel-perez',
     name: 'Gabriel Perez',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Gabriel%20Perez.png',
     role: { es: 'Abogado', en: 'Attorney' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Gabriel-Perez-922x1024.png',
-    video: null,
     bio: {
       es: [
         "Nacido en Houston, Texas. Comenzó como asistente legal en la firma y su pasión lo llevó a convertirse en abogado.",
@@ -358,34 +334,10 @@ const attorneys = [
     }
   },
   {
-    id: 'peyton-barrow',
-    name: 'Peyton Barrow',
-    role: { es: 'Abogado (Memphis)', en: 'Attorney (Memphis)' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Peyton-Barrow-922x1024.png',
-    video: null,
-    bio: {
-      es: [
-        "Abogado en la oficina de Memphis. Su enfoque es empático y orientado a resultados, ayudando a clientes a navegar el sistema de inmigración con claridad.",
-        "Autorizado para ejercer en Tennessee y enfocado en representación eficaz y transparente."
-      ],
-      en: [
-        "Attorney in the Memphis office. His approach is empathetic and results-oriented, helping clients navigate the immigration system with clarity.",
-        "Licensed to practice in Tennessee and focused on effective and transparent representation."
-      ]
-    },
-    education: ["University of Memphis (JD)"],
-    admissions: ["Tennessee Bar Association"],
-    quote: {
-      es: "Ayudar a navegar el complejo sistema de inmigración con confianza.",
-      en: "Helping to navigate the complex immigration system with confidence."
-    }
-  },
-  {
     id: 'sara-james',
     name: 'Sara James',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Sara%20James.png',
     role: { es: 'Abogada (Memphis)', en: 'Attorney (Memphis)' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Sara-James-922x1024.png',
-    video: null,
     bio: {
       es: [
         "Ejerce en Memphis con pasión por la comunidad hispana. Fue Presidenta de la Hispanic Law Student Association y ganadora del premio Champion of Justice 2021.",
@@ -409,9 +361,8 @@ const attorneys = [
   {
     id: 'eduardo-garcia',
     name: 'Eduardo García',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Eduardo.png',
     role: { es: 'Abogado', en: 'Attorney' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Eduardo-Garcia-1-922x1024.png',
-    video: null,
     bio: {
       es: [
         "Antes de ser abogado, fue profesor de Historia. Tiene una Maestría en Historia con enfoque en Borderlands.",
@@ -435,9 +386,8 @@ const attorneys = [
   {
     id: 'alexis-alvarez',
     name: 'Alexis Alvarez',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Alexis-Alvarez.png',
     role: { es: 'Abogada', en: 'Attorney' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Alexis-Alvarez-922x1024.png',
-    video: null,
     bio: {
       es: [
         "Originaria del Valle del Río Grande, Texas. Hija de trabajadores agrícolas migrantes. Esta historia familiar le dio una profunda admiración por la comunidad inmigrante.",
@@ -459,89 +409,10 @@ const attorneys = [
     }
   },
   {
-    id: 'elizabeth-ponce-mcclain',
-    name: 'Elizabeth Ponce McClain',
-    role: { es: 'Abogada', en: 'Attorney' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Elizabeth-Ponce-McClain-922x1024.png',
-    video: null,
-    bio: {
-      es: [
-        "Obtuvo su Licenciatura en Economía en Fordham University y su Juris Doctor en Suffolk University School of Law.",
-        "Es Mediadora Certificada y se enfoca en el bienestar integral de sus clientes, con una vocación especial por ayudar a los niños."
-      ],
-      en: [
-        "She obtained her Bachelor's degree in Economics from Fordham University and her Juris Doctor from Suffolk University School of Law.",
-        "She is a Certified Mediator and focuses on the comprehensive well-being of her clients, with a special vocation for helping children."
-      ]
-    },
-    education: [
-      "Suffolk University School of Law (JD)",
-      { es: "Fordham University (Economía)", en: "Fordham University (Economics)" }
-    ],
-    admissions: ["Texas", "Massachusetts", { es: "Distrito de Columbia", en: "District of Columbia" }],
-    quote: {
-      es: "Resolución de conflictos de manera efectiva, ética y compasiva.",
-      en: "Conflict resolution in an effective, ethical, and compassionate manner."
-    }
-  },
-  {
-    id: 'magdalena-aguilar',
-    name: 'Magdalena "Maggie" Aguilar',
-    role: { es: 'Abogada (Chicago)', en: 'Attorney (Chicago)' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Maggie-922x1024.png',
-    video: null,
-    bio: {
-      es: [
-        "Nació en Aguascalientes, México, y emigró a Chicago de niña. Antes de ser abogada, tuvo una exitosa carrera en marketing.",
-        "Trabajó en la Oficina de Derechos Civiles del Departamento de Educación de EE.UU. y en la Oficina del Fiscal General de Illinois."
-      ],
-      en: [
-        "She was born in Aguascalientes, Mexico, and emigrated to Chicago as a child. Before becoming a lawyer, she had a successful career in marketing.",
-        "She worked at the U.S. Department of Education's Office for Civil Rights and the Illinois Attorney General's Office."
-      ]
-    },
-    education: [
-      "Northern Illinois University College of Law (JD)",
-      "University of Illinois - Chicago"
-    ],
-    admissions: ["Illinois"],
-    quote: {
-      es: "Pone su experiencia al servicio de las familias inmigrantes con empatía, firmeza y compromiso.",
-      en: "She puts her experience at the service of immigrant families with empathy, firmness, and commitment."
-    }
-  },
-  {
-    id: 'ashley-cruz',
-    name: 'Ashley Cruz',
-    role: { es: 'Abogada (Houston)', en: 'Attorney (Houston)' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Ashley-Cruz-922x1024.png',
-    video: null,
-    bio: {
-      es: [
-        "Se enfoca en casos de asilo e inmigración familiar. Antes de esto, trabajó en derecho civil y familiar.",
-        "Obtuvo su título en la Pontificia Universidad Católica de Puerto Rico. Su trato cercano y humano es apreciado por sus clientes."
-      ],
-      en: [
-        "She focuses on asylum and family immigration cases. Prior to this, she worked in civil and family law.",
-        "She obtained her degree from the Pontifical Catholic University of Puerto Rico. Her warm and humane approach is appreciated by her clients."
-      ]
-    },
-    education: [{ es: "Pontificia Universidad Católica de Puerto Rico", en: "Pontifical Catholic University of Puerto Rico" }],
-    admissions: [
-      "Puerto Rico",
-      { es: "Práctica Federal de Inmigración", en: "Federal Immigration Practice" }
-    ],
-    quote: {
-      es: "Pasión por ayudar a las personas a permanecer legalmente y con tranquilidad.",
-      en: "Passion for helping people stay legally and with peace of mind."
-    }
-  },
-  {
     id: 'edward-s-reisman',
     name: 'Edward S. Reisman',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Edward-Steven-Reisman.png',
     role: { es: 'Abogado (Los Ángeles)', en: 'Attorney (Los Angeles)' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Edward-Steven-Reisman-922x1024.png',
-    video: null,
     bio: {
       es: [
         "Ejerce en Los Ángeles. Tiene un JD de Georgetown University Law Center. Su experiencia previa en el Servicio de Inmigración y Naturalización (INS) le da una visión única del sistema.",
@@ -563,60 +434,10 @@ const attorneys = [
     }
   },
   {
-    id: 'yineyri-castillo-arias',
-    name: 'Yineyri Castillo Arias',
-    role: { es: 'Abogada (Houston)', en: 'Attorney (Houston)' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Yineyri-Castillo-922x1024.png',
-    video: null,
-    bio: {
-      es: [
-        "Emigró a EE.UU. y comprende los retos de sus clientes. Es Presidenta de la Comisión de Derechos de los Inmigrantes del Colegio de Abogados de Puerto Rico.",
-        "Trabajó con la Oficina de Reasentamiento de Refugiados de la ONU y fue defensora legal de víctimas de crimen."
-      ],
-      en: [
-        "She immigrated to the U.S. and understands her clients' challenges. She is President of the Immigrant Rights Commission of the Puerto Rico Bar Association.",
-        "She worked with the UN Refugee Resettlement Office and was a legal advocate for crime victims."
-      ]
-    },
-    education: [
-      { es: "Pontificia Universidad Católica de Puerto Rico (JD)", en: "Pontifical Catholic University of Puerto Rico (JD)" },
-      { es: "Universidad Interamericana de Puerto Rico", en: "Interamerican University of Puerto Rico" }
-    ],
-    admissions: ["Puerto Rico"],
-    quote: {
-      es: "Su trabajo se basa en la empatía y el compromiso genuino con el bienestar de cada persona.",
-      en: "Her work is based on empathy and genuine commitment to the well-being of each person."
-    }
-  },
-  {
-    id: 'danatayri-morales-vidal',
-    name: 'Danatayri Morales Vidal, Esq.',
-    role: { es: 'Abogada (Houston)', en: 'Attorney (Houston)' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Danatayri-Morales-Vidal-922x1024.png',
-    video: null,
-    bio: {
-      es: [
-        "Ejerce con convicción en la oficina de Houston. Su principio es defender el derecho de elegir dónde vivir, brindando representación estratégica y humana.",
-        "Su trayectoria refleja un compromiso constante con los derechos fundamentales de las comunidades migrantes."
-      ],
-      en: [
-        "She practices with conviction in the Houston office. Her principle is to defend the right to choose where to live, providing strategic and humane representation.",
-        "Her career reflects a constant commitment to the fundamental rights of migrant communities."
-      ]
-    },
-    education: [{ es: "Abogada Titulada", en: "Licensed Attorney" }],
-    admissions: [{ es: "Práctica Federal de Inmigración", en: "Federal Immigration Practice" }],
-    quote: {
-      es: "El derecho de elegir dónde vivir.",
-      en: "The right to choose where to live."
-    }
-  },
-  {
     id: 'stephanie-l-garcia-vidal',
     name: 'Stephanie L. García Vidal',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Stephanie.png',
     role: { es: 'Abogada (Dallas)', en: 'Attorney (Dallas)' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Stephanie-Garcia-Vidal-922x1024.png',
-    video: null,
     bio: {
       es: [
         "Ejerce en la oficina de Dallas del Bufete de Abogados Manuel Solís, donde brinda representación legal comprometida y empática a personas y familias inmigrantes. Su pasión por la abogacía nace del deseo de apoyar a quienes emprendieron un viaje transformador para construir un futuro más seguro y digno.",
@@ -649,9 +470,8 @@ const attorneys = [
   {
     id: 'lupita-valenzuela-martinez',
     name: 'Lupita Valenzuela Martinez',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Lupita.png',
     role: { es: 'Abogada (Memphis)', en: 'Attorney (Memphis)' },
-    image: '/lupita.png',
-    video: null,
     bio: {
       es: [
         "Ejerce la abogacía con pasión y entrega desde nuestra oficina de Memphis. Su mayor inspiración proviene de ayudar a quienes no pueden defenderse por sí mismos, y su misión es asegurar que todos reciban la representación comprometida y valiente que merecen. Su trabajo está profundamente guiado por el deseo de servir a la comunidad hispana, motor que alimenta su vocación día a día.",
@@ -685,9 +505,8 @@ const attorneys = [
   {
     id: 'himani-augustina-vithanage',
     name: 'Himani Augustina Vithanage',
+    image: 'https://uenjwzjx3vckezns.public.blob.vercel-storage.com/Himani%20Augustina%20Vithanage.png',
     role: { es: 'Abogada', en: 'Attorney' },
-    image: 'https://manuelsolis.com/wp-content/uploads/2025/07/Himani-Augustina-Vithanage-922x1024.png',
-    video: null,
     bio: {
       es: [
         "Una voz firme para quienes más lo necesitan. Busca empoderar a sus clientes con empatía, conocimiento y pasión.",
@@ -711,21 +530,14 @@ export default function AttorneysPage() {
   const { language } = useLanguage();
   const [selectedAttorney, setSelectedAttorney] = useState<any>(null);
 
-  const handleImageError = (e: any) => {
-     e.target.src = 'https://manuelsolis.com/wp-content/uploads/2024/11/logo-manuelsolis.png';
-     e.target.style.objectFit = 'contain';
-     e.target.style.padding = '20px';
-     e.target.style.backgroundColor = '#002342';
-  };
-
-  // Función helper para obtener texto traducido
-  const getText = (obj: any) => {
+  // Función helper para obtener texto traducido (memoizada)
+  const getText = useMemo(() => (obj: any) => {
     if (typeof obj === 'string') return obj;
     return obj[language] || obj.es || obj;
-  };
+  }, [language]);
 
-  // Textos de la interfaz
-  const texts = {
+  // Textos de la interfaz (memoizados)
+  const texts = useMemo(() => ({
     hero: {
       badge: { es: 'Defensa de Clase Mundial', en: 'World-Class Defense' },
       title1: { es: 'Conozca a Sus', en: 'Meet Your' },
@@ -743,7 +555,7 @@ export default function AttorneysPage() {
       education: { es: 'Educación', en: 'Education' },
       admissions: { es: 'Admisiones', en: 'Admissions' },
       achievements: { es: 'Logros', en: 'Achievements' },
-      button: { es: 'Solicitar Consulta Privada', en: 'Request Private Consultation' },
+      button: { es: 'Solicitar Consulta', en: 'Request Consultation' },
       defaultBio: {
         es: 'es un miembro fundamental de nuestro equipo legal. Con una trayectoria dedicada a la defensa de los derechos de nuestros clientes, aporta experiencia, integridad y un compromiso inquebrantable para lograr los mejores resultados posibles.',
         en: 'is a fundamental member of our legal team. With a career dedicated to defending our clients\' rights, they bring experience, integrity, and an unwavering commitment to achieving the best possible results.'
@@ -751,21 +563,56 @@ export default function AttorneysPage() {
       educationFallback: { es: 'Información disponible en consulta.', en: 'Information available upon consultation.' },
       admissionsFallback: { es: 'Abogado certificado y reconocido.', en: 'Certified and recognized attorney.' }
     }
-  };
+  }), []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#001529] text-white relative selection:bg-[#B2904D] selection:text-white font-sans">
+    <div className="min-h-screen flex flex-col bg-[#001529] text-white relative selection:bg-[#B2904D] selection:text-white font-sans overflow-x-hidden">
       
       <Header />
 
-      {/* HERO SECTION */}
-      <section className="relative pt-40 pb-24 px-4 overflow-hidden">
-        <div className="absolute inset-0 z-0">
-             <div className="absolute inset-0 bg-[#002342] opacity-95"></div>
-             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[500px] bg-[#B2904D] opacity-20 rounded-full blur-[120px]"></div>
-             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"></div>
-        </div>
+      {/* FONDO ATMOSFÉRICO OPTIMIZADO */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#002868] via-[#001540] to-[#000a20]" />
+          
+          {/* Texto Gigante Animado - Optimizado con will-change */}
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+            <motion.div
+              initial={{ x: "100%" }} 
+              animate={{ x: "-100%" }} 
+              transition={{ 
+                duration: 120, 
+                repeat: Infinity, 
+                ease: "linear",
+                repeatType: "loop"
+              }}
+              className="whitespace-nowrap opacity-[0.04] select-none"
+              style={{ willChange: 'transform' }}
+            >
+              <span className="text-[120vh] font-extrabold italic text-white tracking-tighter mix-blend-overlay transform -skew-x-12 inline-block">
+                N/\И/\N/\N/
+              </span>
+            </motion.div>
+          </div>
 
+          {/* Orbes de luz optimizados */}
+          <motion.div 
+            animate={{ scale: [1, 1.1, 1], opacity: [0.4, 0.6, 0.4] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-[-20%] right-[-10%] w-[70vw] h-[70vw] bg-blue-500/30 rounded-full blur-[150px]"
+            style={{ willChange: 'transform, opacity' }}
+          />
+          <motion.div 
+            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+            className="absolute bottom-[-20%] left-[-10%] w-[60vw] h-[60vw] bg-sky-600/30 rounded-full blur-[180px]"
+            style={{ willChange: 'transform, opacity' }}
+          />
+          
+          <div className="absolute inset-0 bg-blue-950/20 mix-blend-multiply"></div>
+      </div>
+      
+      {/* HERO SECTION */}
+      <section className="relative pt-48 pb-24 px-4 overflow-hidden z-10">
         <div className="relative z-10 max-w-7xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -773,20 +620,20 @@ export default function AttorneysPage() {
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#B2904D]/30 bg-[#B2904D]/10 backdrop-blur-md mb-6">
-                <Scale size={14} className="text-[#B2904D]" />
-                <span className="text-[#B2904D] text-xs font-bold tracking-widest uppercase">
-                  {texts.hero.badge[language]}
-                </span>
+              <Scale size={14} className="text-[#B2904D]" />
+              <span className="text-[#B2904D] text-xs font-bold tracking-widest uppercase">
+                {texts.hero.badge[language]}
+              </span>
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-serif font-bold text-white mb-6 leading-tight">
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight drop-shadow-[0_0_20px_rgba(0,0,0,0.5)]">
               {texts.hero.title1[language]}{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#B2904D] to-[#e6c67e]">
                 {texts.hero.title2[language]}
               </span>
             </h1>
             
-            <p className="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto font-light leading-relaxed">
+            <p className="text-blue-100/70 text-lg md:text-xl max-w-2xl mx-auto font-light leading-relaxed">
               {texts.hero.subtitle[language]}
             </p>
           </motion.div>
@@ -800,43 +647,45 @@ export default function AttorneysPage() {
             
             {attorneys.map((attorney, index) => (
               <motion.div
-                key={index}
+                key={attorney.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ delay: index * 0.05, duration: 0.5 }}
                 onClick={() => setSelectedAttorney(attorney)}
-                className="group relative h-[450px] rounded-2xl overflow-hidden cursor-pointer border border-white/5 bg-[#002b52]/30 backdrop-blur-sm hover:border-[#B2904D]/50 hover:shadow-[0_0_30px_rgba(178,144,77,0.15)] transition-all duration-500"
+                className="group relative h-[450px] rounded-2xl overflow-hidden cursor-pointer border border-white/10 bg-[#001540]/60 backdrop-blur-md hover:border-[#B2904D]/70 hover:shadow-[0_0_30px_rgba(178,144,77,0.25)] transition-all duration-500"
+                style={{ willChange: 'transform' }}
               >
                 <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
-                   <Image 
-                      src={attorney.image} 
-                      alt={attorney.name}
-                      fill
-                      className={attorney.id === 'lupita-valenzuela-martinez' 
-                        ? "object-cover object-[center_20%]" 
-                        : "object-cover object-top"}
-                      onError={handleImageError}
-                      unoptimized 
-                   />
+                  <Image 
+                    src={attorney.image} 
+                    alt={attorney.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                    className={attorney.id === 'lupita-valenzuela-martinez' 
+                      ? "object-cover object-[center_20%]" 
+                      : "object-cover object-top"}
+                    loading={index < 8 ? "eager" : "lazy"}
+                    priority={index < 4}
+                  />
                 </div>
 
-                <div className="absolute inset-0 bg-gradient-to-t from-[#001529] via-[#001529]/50 to-transparent opacity-90 group-hover:opacity-80 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#001540]/90 via-[#001540]/50 to-transparent opacity-95 group-hover:opacity-90 transition-opacity duration-500" />
 
                 <div className="absolute bottom-0 left-0 w-full p-6 transform transition-transform duration-500 translate-y-2 group-hover:translate-y-0">
-                   <div className="w-12 h-1 bg-[#B2904D] mb-3 rounded-full group-hover:w-24 transition-all duration-500"></div>
-                   
-                   <h3 className="text-2xl font-serif font-bold text-white leading-none mb-2 drop-shadow-md">
-                     {attorney.name}
-                   </h3>
-                   
-                   <p className="text-[#B2904D] text-xs font-bold tracking-widest uppercase mb-4 flex items-center gap-2">
-                     <ShieldCheck size={14} /> {getText(attorney.role)}
-                   </p>
-                   
-                   <div className="flex items-center gap-2 text-white text-sm font-medium opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-500 delay-75">
-                      {texts.card.viewProfile[language]} <ChevronRight size={16} className="text-[#B2904D]" />
-                   </div>
+                  <div className="w-12 h-1 bg-[#B2904D] mb-3 rounded-full group-hover:w-24 transition-all duration-500 shadow-[0_0_15px_#B2904D]"></div>
+                  
+                  <h3 className="text-2xl font-bold text-white leading-none mb-2 drop-shadow-lg">
+                    {attorney.name}
+                  </h3>
+                  
+                  <p className="text-[#B2904D] text-xs font-bold tracking-widest uppercase mb-4 flex items-center gap-2">
+                    <ShieldCheck size={14} /> {getText(attorney.role)}
+                  </p>
+                  
+                  <div className="flex items-center gap-2 text-white text-sm font-medium opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-500 delay-75">
+                    {texts.card.viewProfile[language]} <ChevronRight size={16} className="text-[#B2904D]" />
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -845,7 +694,7 @@ export default function AttorneysPage() {
         </div>
       </section>
 
-      {/* MODAL DE DETALLE */}
+      {/* MODAL DE DETALLE OPTIMIZADO */}
       <AnimatePresence>
         {selectedAttorney && (
           <motion.div 
@@ -855,144 +704,132 @@ export default function AttorneysPage() {
             className="fixed inset-0 z-[9999] flex items-center justify-center p-0 md:p-4 bg-black/80 backdrop-blur-xl overflow-hidden"
             onClick={() => setSelectedAttorney(null)} 
           >
-             <motion.div 
-               initial={{ scale: 0.9, opacity: 0, y: 50 }}
-               animate={{ scale: 1, opacity: 1, y: 0 }}
-               exit={{ scale: 0.9, opacity: 0, y: 50 }}
-               transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
-               onClick={(e) => e.stopPropagation()} 
-               className="bg-[#002342] w-full md:max-w-6xl h-full md:h-auto md:max-h-[90vh] md:rounded-3xl border-0 md:border border-white/10 shadow-2xl flex flex-col lg:flex-row relative overflow-hidden"
-             >
-                <button 
-                  onClick={() => setSelectedAttorney(null)}
-                  className="absolute top-4 right-4 z-50 bg-black/40 hover:bg-[#B2904D] text-white p-2 rounded-full transition-all border border-white/10 group"
-                >
-                  <X size={24} className="group-hover:rotate-90 transition-transform" />
-                </button>
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 50 }}
+              transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
+              onClick={(e) => e.stopPropagation()} 
+              className="bg-[#001f4a] w-full md:max-w-6xl h-full md:h-auto md:max-h-[90vh] md:rounded-3xl border border-white/10 shadow-2xl flex flex-col lg:flex-row relative overflow-hidden"
+            >
+              <button 
+                onClick={() => setSelectedAttorney(null)}
+                className="absolute top-4 right-4 z-50 bg-black/40 hover:bg-[#B2904D] text-white p-2 rounded-full transition-all border border-white/10 group"
+                aria-label="Cerrar"
+              >
+                <CloseIcon size={24} className="group-hover:rotate-90 transition-transform" />
+              </button>
 
-                {/* Media */}
-                <div className="w-full lg:w-5/12 bg-black relative h-[35vh] lg:h-auto group">
-                    {selectedAttorney.video ? (
-                         <video 
-                           src={selectedAttorney.video} 
-                           controls 
-                           autoPlay 
-                           playsInline
-                           className="w-full h-full object-cover"
-                           poster={selectedAttorney.image} 
-                         />
+              {/* Imagen del Abogado */}
+              <div className="w-full lg:w-5/12 bg-black relative h-[35vh] lg:h-auto">
+                <Image 
+                  src={selectedAttorney.image} 
+                  alt={selectedAttorney.name}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  className={selectedAttorney.id === 'lupita-valenzuela-martinez' 
+                    ? "object-cover object-[center_20%]" 
+                    : "object-cover object-top"}
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#001540] via-transparent to-transparent opacity-80"></div>
+                
+                <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-[#001f4a] to-transparent lg:hidden">
+                  <h2 className="text-3xl font-bold text-white">{selectedAttorney.name}</h2>
+                  <p className="text-[#B2904D] text-sm">{getText(selectedAttorney.role)}</p>
+                </div>
+              </div>
+
+              {/* Contenido de Información */}
+              <div className="w-full lg:w-7/12 p-6 lg:p-10 overflow-y-auto bg-gradient-to-br from-[#001f4a] to-[#001a33] relative">
+                
+                <div className="hidden lg:block mb-8">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="px-3 py-1 rounded bg-[#B2904D]/20 text-[#B2904D] text-xs font-bold uppercase tracking-wider border border-[#B2904D]/30">
+                      {texts.modal.badge[language]}
+                    </div>
+                  </div>
+                  <h2 className="text-5xl font-bold text-white mb-1">
+                    {selectedAttorney.name}
+                  </h2>
+                  <p className="text-gray-400 text-xl font-light flex items-center gap-2">
+                    <Gavel size={18} className="text-[#B2904D]" /> {getText(selectedAttorney.role)}
+                  </p>
+                </div>
+
+                {selectedAttorney.quote && (
+                  <div className="mb-8 relative">
+                    <div className="absolute -left-2 -top-2 text-[#B2904D]/20">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H15.017C14.4647 8 14.017 8.44772 14.017 9V11C14.017 11.5523 13.5693 12 13.017 12H12.017V5H22.017V15C22.017 18.3137 19.3307 21 16.017 21H14.017ZM5.0166 21L5.0166 18C5.0166 16.8954 5.91203 16 7.0166 16H10.0166C10.5689 16 11.0166 15.5523 11.0166 15V9C11.0166 8.44772 10.5689 8 10.0166 8H6.0166C5.46432 8 5.0166 8.44772 5.0166 9V11C5.0166 11.5523 4.56889 12 4.0166 12H3.0166V5H13.0166V15C13.0166 18.3137 10.3303 21 7.0166 21H5.0166Z" /></svg>
+                    </div>
+                    <p className="text-[#B2904D] text-lg italic font-medium pl-8 relative z-10 border-l-2 border-[#B2904D]/50">
+                      "{getText(selectedAttorney.quote)}"
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-4 text-gray-300 leading-relaxed font-light mb-8 text-sm md:text-base text-justify">
+                  {selectedAttorney.bio ? (
+                    Array.isArray(getText(selectedAttorney.bio)) ? (
+                      getText(selectedAttorney.bio).map((paragraph: string, idx: number) => (
+                        <p key={idx}>{paragraph}</p>
+                      ))
                     ) : (
-                         <div className="relative w-full h-full">
-                            <Image 
-                              src={selectedAttorney.image} 
-                              alt={selectedAttorney.name}
-                              fill
-                              className={selectedAttorney.id === 'lupita-valenzuela-martinez' 
-                                ? "object-cover object-[center_20%]" 
-                                : "object-cover object-top"}
-                              onError={handleImageError}
-                              unoptimized
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#002342] via-transparent to-transparent opacity-80"></div>
-                         </div>
-                    )}
-                    
-                    <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-[#002342] to-transparent lg:hidden">
-                        <h2 className="text-3xl font-serif font-bold text-white">{selectedAttorney.name}</h2>
-                        <p className="text-[#B2904D] text-sm">{getText(selectedAttorney.role)}</p>
-                    </div>
+                      <p>{getText(selectedAttorney.bio)}</p>
+                    )
+                  ) : (
+                    <p>{language === 'es' ? 'El abogado' : 'Attorney'} {selectedAttorney.name} {texts.modal.defaultBio[language]}</p>
+                  )}
                 </div>
 
-                {/* Info Content */}
-                <div className="w-full lg:w-7/12 p-6 lg:p-10 overflow-y-auto bg-gradient-to-br from-[#002342] to-[#001a33] relative">
-                    
-                    <div className="hidden lg:block mb-8">
-                        <div className="flex items-center gap-3 mb-2">
-                             <div className="px-3 py-1 rounded bg-[#B2904D]/20 text-[#B2904D] text-xs font-bold uppercase tracking-wider border border-[#B2904D]/30">
-                                 {texts.modal.badge[language]}
-                             </div>
-                        </div>
-                        <h2 className="text-5xl font-serif font-bold text-white mb-1">
-                          {selectedAttorney.name}
-                        </h2>
-                        <p className="text-gray-400 text-xl font-light flex items-center gap-2">
-                           <Gavel size={18} /> {getText(selectedAttorney.role)}
-                        </p>
-                    </div>
-
-                    {selectedAttorney.quote && (
-                        <div className="mb-8 relative">
-                            <div className="absolute -left-2 -top-2 text-[#B2904D]/20">
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H15.017C14.4647 8 14.017 8.44772 14.017 9V11C14.017 11.5523 13.5693 12 13.017 12H12.017V5H22.017V15C22.017 18.3137 19.3307 21 16.017 21H14.017ZM5.0166 21L5.0166 18C5.0166 16.8954 5.91203 16 7.0166 16H10.0166C10.5689 16 11.0166 15.5523 11.0166 15V9C11.0166 8.44772 10.5689 8 10.0166 8H6.0166C5.46432 8 5.0166 8.44772 5.0166 9V11C5.0166 11.5523 4.56889 12 4.0166 12H3.0166V5H13.0166V15C13.0166 18.3137 10.3303 21 7.0166 21H5.0166Z" /></svg>
-                            </div>
-                            <p className="text-[#B2904D] text-lg italic font-medium pl-8 relative z-10 border-l-2 border-[#B2904D]/50">
-                                "{getText(selectedAttorney.quote)}"
-                            </p>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 p-4 bg-black/20 rounded-2xl border border-white/5">
+                  <div>
+                    <h4 className="text-white font-bold flex items-center gap-2 mb-3 text-sm uppercase tracking-wider">
+                      <GraduationCap size={18} className="text-[#B2904D]" /> {texts.modal.education[language]}
+                    </h4>
+                    {selectedAttorney.education ? (
+                      <ul className="text-xs md:text-sm text-gray-400 space-y-2">
+                        {selectedAttorney.education.map((edu: any, i: number) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#B2904D] mt-1.5"></div>
+                            {getText(edu)}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-xs text-gray-500 italic">{texts.modal.educationFallback[language]}</p>
                     )}
-
-                    <div className="space-y-4 text-gray-300 leading-relaxed font-light mb-8 text-sm md:text-base text-justify">
-                        {selectedAttorney.bio ? (
-                            Array.isArray(getText(selectedAttorney.bio)) ? (
-                                getText(selectedAttorney.bio).map((paragraph: string, idx: number) => (
-                                    <p key={idx}>{paragraph}</p>
-                                ))
-                            ) : (
-                                <p>{getText(selectedAttorney.bio)}</p>
-                            )
-                        ) : (
-                            <p>{language === 'es' ? 'El abogado' : 'Attorney'} {selectedAttorney.name} {texts.modal.defaultBio[language]}</p>
-                        )}
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 p-4 bg-black/20 rounded-2xl border border-white/5">
-                        <div>
-                            <h4 className="text-white font-bold flex items-center gap-2 mb-3 text-sm uppercase tracking-wider">
-                                <GraduationCap size={18} className="text-[#B2904D]" /> {texts.modal.education[language]}
-                            </h4>
-                            {selectedAttorney.education ? (
-                                <ul className="text-xs md:text-sm text-gray-400 space-y-2">
-                                    {selectedAttorney.education.map((edu: any, i: number) => (
-                                        <li key={i} className="flex items-start gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-[#B2904D] mt-1.5"></div>
-                                            {getText(edu)}
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p className="text-xs text-gray-500 italic">{texts.modal.educationFallback[language]}</p>
-                            )}
-                        </div>
-                        
-                        <div>
-                             <h4 className="text-white font-bold flex items-center gap-2 mb-3 text-sm uppercase tracking-wider">
-                                {selectedAttorney.admissions ? <><Scale size={18} className="text-[#B2904D]" /> {texts.modal.admissions[language]}</> : <><Award size={18} className="text-[#B2904D]" /> {texts.modal.achievements[language]}</>} 
-                            </h4>
-                            {selectedAttorney.admissions ? (
-                                <ul className="text-xs md:text-sm text-gray-400 space-y-2">
-                                    {selectedAttorney.admissions.map((adm: any, i: number) => (
-                                        <li key={i} className="flex items-start gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-[#B2904D] mt-1.5"></div>
-                                            {getText(adm)}
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p className="text-xs text-gray-500 italic">{texts.modal.admissionsFallback[language]}</p>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="mt-auto">
-                        <a href="/#contacto" onClick={() => setSelectedAttorney(null)} className="w-full bg-gradient-to-r from-[#B2904D] to-[#9f7d3d] hover:from-white hover:to-white hover:text-[#002342] text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all shadow-lg shadow-black/40 group">
-                            <Mail size={20} />
-                            {texts.modal.button[language]}
-                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                        </a>
-                    </div>
-
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-white font-bold flex items-center gap-2 mb-3 text-sm uppercase tracking-wider">
+                      {selectedAttorney.admissions ? <><Scale size={18} className="text-[#B2904D]" /> {texts.modal.admissions[language]}</> : <><Award size={18} className="text-[#B2904D]" /> {texts.modal.achievements[language]}</>} 
+                    </h4>
+                    {selectedAttorney.admissions ? (
+                      <ul className="text-xs md:text-sm text-gray-400 space-y-2">
+                        {selectedAttorney.admissions.map((adm: any, i: number) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#B2904D] mt-1.5"></div>
+                            {getText(adm)}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-xs text-gray-500 italic">{texts.modal.admissionsFallback[language]}</p>
+                    )}
+                  </div>
                 </div>
-             </motion.div>
+
+                <div className="mt-auto">
+                  <a href="/#contacto" onClick={() => setSelectedAttorney(null)} className="w-full bg-gradient-to-r from-[#B2904D] to-[#9f7d3d] hover:from-white hover:to-white hover:text-[#002342] text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all shadow-lg shadow-black/40 group">
+                    <Mail size={20} />
+                    {texts.modal.button[language]}
+                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  </a>
+                </div>
+
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -5,63 +5,95 @@ import Footer from '../../../components/Footer'
 import ContactForm from '../../../components/ContactForm' 
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import React, { useState } from 'react'
-import { useLanguage } from '../../../context/LanguageContext' // IMPORTACIÓN REQUERIDA
+import { useLanguage } from '../../../context/LanguageContext'
+import { motion, AnimatePresence } from 'framer-motion'; 
+import { Outfit } from 'next/font/google';
+import Image from 'next/image';
 
-// --- DEFINICIÓN DE TIPOS ADAPTADA ---
+// --- FUENTE Y COLORES ---
+const font = Outfit({ 
+  subsets: ['latin'], 
+  weight: ['100', '300', '400', '500', '700'] 
+})
 
+// --- TIPOS ---
 interface FaqItemBilingual {
   title: { es: string; en: string };
   content: { es: string; en: string };
 }
 
-// --- FUNCIÓN AUXILIAR PARA OBTENER EL TEXTO TRADUCIDO ---
+// --- UTILIDAD: PARSEAR MARKDOWN A HTML ---
+const parseContent = (text: string) => {
+  let parsed = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  parsed = parsed.replace(/\n/g, '<br />');
+  return parsed;
+};
 
-/**
- * Función genérica para obtener el texto correcto de un objeto bilingüe.
- * @param obj El objeto con propiedades 'es' y 'en' (o un string simple).
- * @param lang El idioma actual ('es' o 'en').
- */
 const getText = (obj: any, lang: 'es' | 'en'): string => {
   if (typeof obj === 'string') return obj;
   return obj[lang] || obj.es;
 };
 
-// --- COMPONENTE REUTILIZABLE PARA EL ACORDEÓN (ADAPTADO) ---
-
+// --- COMPONENTE ACORDEÓN OPTIMIZADO ---
 function Accordion({ item, lang }: { item: FaqItemBilingual, lang: 'es' | 'en' }) {
   const [isOpen, setIsOpen] = useState(false);
   const title = getText(item.title, lang);
-  const content = getText(item.content, lang);
+  const rawContent = getText(item.content, lang);
+  const contentHtml = parseContent(rawContent);
 
   return (
-    <div className="border-b border-gray-200">
+    <div className="group mb-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-4 text-left flex items-center justify-between text-lg font-semibold text-gray-800 hover:text-[#B2904D] transition-colors duration-200"
+        className={`
+          w-full px-6 py-5 flex items-center justify-between text-left transition-all duration-300 rounded-xl
+          ${isOpen 
+            ? 'bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)] border-white/20' 
+            : 'bg-white/5 hover:bg-white/10 border-white/10 hover:shadow-[0_0_10px_rgba(255,255,255,0.05)]'
+          }
+          border backdrop-blur-md
+        `}
       >
-        <span>{title}</span>
-        <div className="flex items-center gap-2">
-          {isOpen ? (
-            <ChevronUp className="w-5 h-5 text-[#B2904D]" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-gray-500" />
-          )}
+        <span className={`text-lg font-light tracking-wide ${isOpen ? 'text-[#B2904D] font-medium' : 'text-white'}`}>
+          {title}
+        </span>
+        <div className={`p-2 rounded-full transition-all duration-300 ${isOpen ? 'bg-[#B2904D] text-[#001540]' : 'bg-white/5 text-white'}`}>
+          {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
         </div>
       </button>
 
-      {isOpen && (
-        <div 
-          className="px-4 py-4 bg-gray-50 text-gray-700 text-base leading-relaxed"
-          // Utiliza dangerouslySetInnerHTML para renderizar el HTML dentro del contenido.
-          dangerouslySetInnerHTML={{ __html: content }} 
-        />
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div 
+              className="px-6 py-6 text-blue-100/80 text-base font-light leading-relaxed bg-black/20 rounded-b-xl mx-2 border-x border-b border-white/5 shadow-inner"
+              dangerouslySetInnerHTML={{ __html: contentHtml }} 
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-// --- TEXTOS DE LA INTERFAZ FIJA ---
+// --- COMPONENTE TÍTULO DE SECCIÓN ---
+const SectionTitle = ({ title }: { title: string }) => (
+  <div className="mb-8 flex items-center gap-4">
+     <div className="h-px bg-gradient-to-r from-transparent via-[#B2904D] to-transparent w-full opacity-50"></div>
+     <h2 className="text-2xl md:text-3xl font-light text-white whitespace-nowrap drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+       {title}
+     </h2>
+     <div className="h-px bg-gradient-to-r from-transparent via-[#B2904D] to-transparent w-full opacity-50"></div>
+  </div>
+);
 
+// --- TEXTOS UI ---
 const interfaceTexts = {
   hero: {
     title: { es: 'PREGUNTAS FRECUENTES', en: 'FREQUENTLY ASKED QUESTIONS' },
@@ -75,15 +107,13 @@ const interfaceTexts = {
     insuranceLaw: { es: 'Ley de Seguros', en: 'Insurance Law' },
   },
   contact: {
-    title1: { es: 'SOLICITE SU', en: 'REQUEST YOUR' },
-    title2: { es: 'CONSULTA', en: 'CONSULTATION' },
-    subtitle: { es: 'Llene este formulario y le llamaremos en unos 10 minutos en horas de trabajo. También puede llamarnos y estaremos encantados de contestar sus preguntas.', en: 'Fill out this form, and we will call you back in about 10 minutes during business hours. You can also call us, and we will be happy to answer your questions.' },
+    title1: { es: '¿Aún tienes', en: 'Still have' },
+    title2: { es: 'dudas?', en: 'questions?' },
+    subtitle: { es: 'Contáctanos y te responderemos lo antes posible', en: 'Contact us and we will respond as soon as possible' },
   }
 };
 
-
-// --- DATOS DE PREGUNTAS FRECUENTES BILINGÜES ---
-
+// --- DATA ---
 const faqDataBilingual = {
   civilLaw: [
     {
@@ -98,7 +128,7 @@ const faqDataBilingual = {
   criminalLaw: [
     {
       title: { es: "¿Cómo sé que he sido arrestado?", en: "How do I know I've been arrested?" },
-      content: { es: "Usted está bajo arresto si un oficial de policía lo detiene bajo “custodia”. Esto significa que usted cree razonablemente que no es libre de alejarse de la escena del contacto con el oficial. No todo contacto con un oficial de policía significa que está bajo arresto. Sin duda, si le ponen esposas, está bajo arresto.", en: "You are **under arrest** if a police officer detains you under 'custody'. This means you reasonably believe you are not free to walk away from the scene of the contact with the officer. Not all contact with a police officer means you are under arrest. Without a doubt, if you are handcuffed, you are under arrest." },
+      content: { es: "Usted está bajo arresto si un oficial de policía lo detiene bajo 'custodia'. Esto significa que usted cree razonablemente que no es libre de alejarse de la escena del contacto con el oficial. No todo contacto con un oficial de policía significa que está bajo arresto. Sin duda, si le ponen esposas, está bajo arresto.", en: "You are **under arrest** if a police officer detains you under 'custody'. This means you reasonably believe you are not free to walk away from the scene of the contact with the officer. Not all contact with a police officer means you are under arrest. Without a doubt, if you are handcuffed, you are under arrest." },
     },
     {
       title: { es: "¿Cuáles son las consecuencias de manejar ebrio?", en: "What are the consequences of driving while intoxicated (DWI)?" },
@@ -190,15 +220,15 @@ const faqDataBilingual = {
     },
     {
       title: { es: "¿Qué es el Boletín de Visas?", en: "What is the Visa Bulletin?" },
-      content: { es: "El Boletín de Visas, emitido cada mes por el Departamento de Estado de EE. UU., muestra cuáles solicitudes de “green card” pueden avanzar, en función de cuándo se presentó originalmente la petición I-130 que inicia el proceso de la “green card”. El Boletín de Visas existe porque el Congreso limita la cantidad de “green cards” que se pueden emitir cada año en ciertas categorías, lo que ha creado varios retrasos.", en: "The **Visa Bulletin**, issued each month by the U.S. Department of State, shows which 'green card' applications can move forward, based on when the I-130 petition that starts the 'green card' process was originally filed. The Visa Bulletin exists because Congress limits the number of 'green cards' that can be issued each year in certain categories, which has created various backlogs." },
+      content: { es: "El Boletín de Visas, emitido cada mes por el Departamento de Estado de EE. UU., muestra cuáles solicitudes de 'green card' pueden avanzar, en función de cuándo se presentó originalmente la petición I-130 que inicia el proceso de la 'green card'. El Boletín de Visas existe porque el Congreso limita la cantidad de 'green cards' que se pueden emitir cada año en ciertas categorías, lo que ha creado varios retrasos.", en: "The **Visa Bulletin**, issued each month by the U.S. Department of State, shows which 'green card' applications can move forward, based on when the I-130 petition that starts the 'green card' process was originally filed. The Visa Bulletin exists because Congress limits the number of 'green cards' that can be issued each year in certain categories, which has created various backlogs." },
     },
     {
-      title: { es: "¿Qué es una “Green Card” por matrimonio?", en: "What is a Marriage Green Card?" },
-      content: { es: "La mayoría de los ciudadanos estadounidenses y los titulares de la “green card” de los Estados Unidos tienen derecho por ley a patrocinar a sus cónyuges para una “green card”, también conocida como “estado de residente permanente”. El costo total, el tiempo de espera y otros detalles del proceso de la green card de matrimonio varían basado en varios factores.", en: "Most U.S. citizens and U.S. 'green card' holders are entitled by law to sponsor their spouses for a 'green card', also known as 'lawful permanent resident status'. The total cost, waiting time, and other details of the marriage green card process vary based on several factors." },
+      title: { es: "¿Qué es una 'Green Card' por matrimonio?", en: "What is a Marriage Green Card?" },
+      content: { es: "La mayoría de los ciudadanos estadounidenses y los titulares de la 'green card' de los Estados Unidos tienen derecho por ley a patrocinar a sus cónyuges para una 'green card', también conocida como 'estado de residente permanente'. El costo total, el tiempo de espera y otros detalles del proceso de la green card de matrimonio varían basado en varios factores.", en: "Most U.S. citizens and U.S. 'green card' holders are entitled by law to sponsor their spouses for a 'green card', also known as 'lawful permanent resident status'. The total cost, waiting time, and other details of the marriage green card process vary based on several factors." },
     },
     {
       title: { es: "¿Qué es una Green Card (Tarjeta Verde)?", en: "What is a Green Card?" },
-      content: { es: "Una Green Card “tarjeta verde”, emitida por los Servicios de Ciudadanía e Inmigración de los Estados Unidos (USCIS), proporciona prueba de la condición de residente permanente legal, con autorización para vivir y trabajar en cualquier lugar de los Estados Unidos. La mayoría de las Green Card deben renovarse cada 10 años, pero las Green Card condicionales basadas en matrimonio o inversiones deben reemplazarse después de los primeros 2 años.", en: "A **Green Card** (or 'tarjeta verde'), issued by the U.S. Citizenship and Immigration Services (USCIS), provides proof of lawful permanent resident status, with authorization to live and work anywhere in the United States. Most Green Cards must be renewed every 10 years, but conditional Green Cards based on marriage or investment must be replaced after the first 2 years." },
+      content: { es: "Una Green Card 'tarjeta verde', emitida por los Servicios de Ciudadanía e Inmigración de los Estados Unidos (USCIS), proporciona prueba de la condición de residente permanente legal, con autorización para vivir y trabajar en cualquier lugar de los Estados Unidos. La mayoría de las Green Card deben renovarse cada 10 años, pero las Green Card condicionales basadas en matrimonio o inversiones deben reemplazarse después de los primeros 2 años.", en: "A **Green Card** (or 'tarjeta verde'), issued by the U.S. Citizenship and Immigration Services (USCIS), provides proof of lawful permanent resident status, with authorization to live and work anywhere in the United States. Most Green Cards must be renewed every 10 years, but conditional Green Cards based on marriage or investment must be replaced after the first 2 years." },
     },
     {
       title: { es: "Crucé ilegalmente, pero tengo un familiar que me puede pedir. ¿Me pueden detener?", en: "I crossed illegally, but I have a relative who can petition for me. Can I be detained?" },
@@ -244,7 +274,7 @@ const faqDataBilingual = {
     },
     {
       title: { es: "El ajustador del seguro dice que mis cosas se pueden limpiar o reparar y que no es necesario reemplazarlas. ¿Cómo puedo saber si eso es cierto?", en: "The insurance adjuster says my things can be cleaned or repaired and don't need to be replaced. How can I tell if that's true?" },
-      content: { es: "Puede que no sea cierto. Busque la opinión de una empresa de restauración de buena reputación o un profesional calificado. Si la pérdida está relacionada con un incendio, el daño por calor, humo y agua puede ser significativo si los artículos no se consumieron totalmente en el incendio. El olor a humo es difícil de eliminar y es una simplificación excesiva y conveniente para el ajustador con el fin de que afirme o espere que se limpien los artículos dañados. En las Oficinas del Abogado Manuel Solís, le ofrecemos una **inspección GRATUITA** de los daños que ha sufrido para poder así negociar en su nombre con el ajustador de su compañía de seguros y que no le engañen.", en: "It may not be true. Seek the opinion of a reputable **restoration company** or a qualified professional. If the loss is fire-related, heat, smoke, and water damage can be significant if items were not totally consumed in the fire. Smoke odor is difficult to eliminate and it is an oversimplification and convenient for the adjuster to claim or expect damaged items to be cleaned. At the Law Offices of Attorney Manuel Solís, we offer a **FREE inspection** of the damages you have suffered so we can negotiate on your behalf with your insurance company's adjuster and ensure you are not misled." },
+      content: { es: "Puede que no sea cierto. Busque la opinión de una empresa de restauración de buena reputación o un profesional calificado. Si la pérdida está relacionada con un incendio, el daño por calor, humo y agua puede ser significativo si los artículos no se consumieron totalmente en el incendio. El olor a humo es difícil de eliminar y es una simplificación excesiva y conveniente para el ajustador con el fin de que afirme o espere que se limpien los artículos dañados. En las Oficinas del Abogado Manuel Solís, le ofrecemos una **inspección GRATUITA** de los daños que ha sufrido para poder así negociar en su nombre con el ajustador de su compañía de seguros y que no le engañen.", en: "It may not be true. Seek the opinion of a reputable **restoration company** or a qualified professional. If the loss is fire-related, heat, smoke, and water damage can be significant if items were not totally consumed in the fire. Smoke odor is difficult to eliminate and it is an oversimplification and convenient for the adjuster to claim or expect damaged items to be cleaned. In the Law Offices of Attorney Manuel Solís, we offer a **FREE inspection** of the damages you have suffered so we can negotiate on your behalf with your insurance company's adjuster and ensure you are not misled." },
     },
     {
       title: { es: "Se me ha inundado la casa y mi seguro dice que no me cubre los daños. ¿Qué debo hacer?", en: "My house has been flooded, and my insurance says it doesn't cover the damages. What should I do?" },
@@ -258,7 +288,6 @@ export default function PreguntasFrecuentesPage() {
   const { language } = useLanguage();
   const lang = language as 'es' | 'en';
   
-  // Función t (translate) para textos fijos de interfaz
   const t = (key: string): string => {
     const parts = key.split('.');
     let current: any = interfaceTexts;
@@ -273,126 +302,272 @@ export default function PreguntasFrecuentesPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className={`relative min-h-screen w-full bg-[#001540] text-white overflow-x-hidden ${font.className}`}>
       <Header />
 
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-16 overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: 'url(/apretondemanos.png)',
-          }}
-        />
-        
-        <div className="absolute inset-0 bg-black/30"></div>
+      {/* =========================================================================
+          FONDO ATMOSFÉRICO (Z-0) - OPTIMIZADO
+      ========================================================================= */}
+      <div className="fixed inset-0 z-0 pointer-events-none w-full h-full transform-gpu">
+         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#002868] via-[#001540] to-[#000a20]" />
+         
+         {/* Ruido sutil */}
+         <div className="absolute inset-0 opacity-[0.05] mix-blend-overlay" style={{ backgroundImage: 'url(/noise.png)', backgroundRepeat: 'repeat' }}></div>
 
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
-              {t('hero.title')}
-            </h1>
-            <p className="text-xl text-white/90 animate-fade-in-delay">
-              {t('hero.subtitle')}
-            </p>
+         {/* Animaciones de Luz Optimizado: Blur reducido y will-change */}
+         <motion.div 
+           animate={{ opacity: [0.2, 0.4, 0.2], scale: [1, 1.1, 1] }}
+           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+           style={{ willChange: "transform, opacity" }}
+           className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-blue-600/10 rounded-full blur-[80px]" 
+         />
+         <motion.div 
+            animate={{ opacity: [0.15, 0.3, 0.15], scale: [1, 1.2, 1] }}
+            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+            style={{ willChange: "transform, opacity" }}
+            className="absolute bottom-0 left-0 w-[60vw] h-[60vw] bg-sky-800/10 rounded-full blur-[90px]" 
+         />
+         
+         {/* N Gigante (Opacidad muy baja y estática o will-change si se anima) */}
+         <motion.div
+            initial={{ x: "60%" }} 
+            animate={{ x: "-160%" }} 
+            transition={{ 
+              duration: 80, 
+              repeat: Infinity, 
+              ease: "linear",
+              repeatType: "loop"
+            }}
+            style={{ willChange: "transform" }}
+            className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none select-none overflow-hidden"
+         >
+            <span className="text-[120vh] font-black italic text-white tracking-tighter transform -skew-x-12">
+               N/\И/\
+            </span>
+         </motion.div>
+      </div>
+      
+      {/* =========================================================================
+          CONTENIDO (Z-10)
+      ========================================================================= */}
+      
+      {/* --- HERO SECTION --- */}
+      <section className="relative pt-44 pb-32 z-10 px-6 lg:px-12">
+        <div className="container mx-auto">
+          <div className="grid lg:grid-cols-12 gap-12 items-center">
+            
+            {/* --- IZQUIERDA: LOGO (Cols 5) --- */}
+            <motion.div 
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="lg:col-span-5 relative h-[400px] lg:h-[600px] flex items-center justify-center"
+            >
+              {/* Blur reducido */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-transparent to-transparent blur-2xl rounded-full z-0 opacity-80" />
+              
+              <motion.div
+                initial={{ scale: 0.8, rotateY: -15 }}
+                animate={{ scale: 1, rotateY: 0 }}
+                transition={{ duration: 1.2, ease: "easeOut" }}
+                className="relative z-10 w-full max-w-md transform-gpu"
+              >
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <Image
+                    src="/LogoInformacion.png"
+                    alt="Logo Información"
+                    width={500}
+                    height={500}
+                    className="object-contain drop-shadow-[0_0_20px_rgba(178,144,77,0.4)] hover:drop-shadow-[0_0_30px_rgba(178,144,77,0.6)] transition-all duration-500"
+                    priority
+                  />
+                </div>
+              </motion.div>
+
+              {/* Estadística decorativa - Blur reducido */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                transition={{ delay: 0.8, duration: 1 }}
+                className="absolute bottom-10 left-0 z-40 p-6 border border-white/10 rounded-xl backdrop-blur-md bg-white/5 shadow-xl"
+              >
+                <div className="group">
+                  <div className="flex items-baseline text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-sky-200/50">
+                    <span className="text-5xl font-extralight tracking-tighter">100</span> 
+                    <span className="text-4xl font-thin text-[#B2904D] ml-1 group-hover:rotate-12 transition-transform">+</span>
+                  </div>
+                  <p className="text-xs text-white/60 uppercase tracking-[0.2em] mt-2 font-medium">
+                    {lang === 'es' ? 'Preguntas Respondidas' : 'Questions Answered'}
+                  </p>
+                </div>
+              </motion.div>
+            </motion.div>
+
+            {/* --- DERECHA: TEXTO (Cols 7) --- */}
+            <div className="lg:col-span-7 space-y-10 pl-0 lg:pl-24 relative z-20">
+              
+              <motion.div 
+                initial={{ scaleY: 0 }} 
+                animate={{ scaleY: 1 }} 
+                transition={{ duration: 1.5, delay: 0.5 }}
+                className="absolute left-12 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-sky-500/30 to-transparent origin-top hidden lg:block" 
+              />
+
+              <div className="relative">
+                <h1 className="text-5xl md:text-6xl lg:text-[5.5rem] leading-[0.95] font-thin text-white tracking-tight">
+                  <span className="block overflow-hidden pb-2 perspective-[400px]">
+                    <motion.span 
+                      initial={{ y: "100%", rotateX: -20, opacity: 0 }}
+                      animate={{ y: 0, rotateX: 0, opacity: 1 }}
+                      transition={{ duration: 1.2, delay: 0.15, ease: [0.25, 1, 0.5, 1] }}
+                      className="block text-white/90"
+                    >
+                      {lang === 'es' ? 'PREGUNTAS' : 'FREQUENTLY'}
+                    </motion.span>
+                  </span>
+                  
+                  <span className="block overflow-hidden pb-4 perspective-[400px]">
+                    <motion.span 
+                      initial={{ y: "100%", rotateX: -20, opacity: 0 }}
+                      animate={{ y: 0, rotateX: 0, opacity: 1 }}
+                      transition={{ duration: 1.2, delay: 0.3, ease: [0.25, 1, 0.5, 1] }}
+                      className="block font-medium relative w-fit pr-6"
+                    >
+                      <span className="text-[#B2904D] drop-shadow-xl">
+                        {lang === 'es' ? 'FRECUENTES' : 'ASKED'}
+                      </span>
+                      <motion.span 
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent bg-[length:200%_100%] bg-clip-text text-transparent mix-blend-color-dodge pointer-events-none"
+                        animate={{ backgroundPosition: ["-150% 0", "150% 0"] }}
+                        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
+                        style={{ willChange: "background-position" }}
+                      >
+                        {lang === 'es' ? 'FRECUENTES' : 'ASKED'}
+                      </motion.span>
+                    </motion.span>
+                  </span>
+
+                  {lang === 'en' && (
+                    <span className="block overflow-hidden perspective-[400px]">
+                      <motion.span 
+                        initial={{ y: "100%", rotateX: -20, opacity: 0 }}
+                        animate={{ y: 0, rotateX: 0, opacity: 1 }}
+                        transition={{ duration: 1.2, delay: 0.45, ease: [0.25, 1, 0.5, 1] }}
+                        className="block font-medium relative w-fit pr-6"
+                      >
+                        <span className="text-[#B2904D] drop-shadow-xl">
+                          QUESTIONS
+                        </span>
+                        <motion.span 
+                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent bg-[length:200%_100%] bg-clip-text text-transparent mix-blend-color-dodge pointer-events-none"
+                          animate={{ backgroundPosition: ["-150% 0", "150% 0"] }}
+                          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", repeatDelay: 2, delay: 0.5 }}
+                          style={{ willChange: "background-position" }}
+                        >
+                          QUESTIONS
+                        </motion.span>
+                      </motion.span>
+                    </span>
+                  )}
+                </h1>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 1 }}
+                className="relative"
+              >
+                <div className="w-32 h-1 bg-gradient-to-r from-[#B2904D] to-transparent rounded-full shadow-[0_0_10px_#B2904D] mb-6" />
+                <p className="text-xl text-white/70 font-extralight max-w-xl leading-relaxed pl-4 border-l border-white/10">
+                  {t('hero.subtitle')}
+                </p>
+              </motion.div>
+
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
+                className="flex flex-wrap items-center gap-12 pl-4"
+              >
+                <div className="group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-[#B2904D] shadow-[0_0_5px_#B2904D] group-hover:shadow-[0_0_10px_#B2904D] transition-all" />
+                    <p className="text-sm text-white/60 uppercase tracking-[0.2em] font-medium group-hover:text-white/90 transition-colors">
+                      {lang === 'es' ? 'Respuestas Claras y Profesionales' : 'Clear and Professional Answers'}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+            </div>
           </div>
         </div>
       </section>
       
-      {/* --- FAQ Content Sections --- */}
-      <div className="container mx-auto px-4 py-16">
+      {/* --- SECCIONES DE ACORDEÓN --- */}
+      <div className="container mx-auto px-4 py-12 relative z-10 max-w-4xl">
         
-        {/* Ley Civil / Civil Law */}
-        <div className="mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 border-b-4 border-[#B2904D] pb-2">
-            {t('sections.civilLaw')}
-          </h2>
-          <div className="space-y-4 rounded-xl border border-gray-100 shadow-lg p-4">
-            {faqDataBilingual.civilLaw.map((item, index) => (
-              <Accordion key={index} item={item} lang={lang} />
-            ))}
-          </div>
-        </div>
-        
-        <hr className="my-10" />
-
-        {/* Ley Criminal / Criminal Law */}
-        <div className="mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 border-b-4 border-[#B2904D] pb-2">
-            {t('sections.criminalLaw')}
-          </h2>
-          <div className="space-y-4 rounded-xl border border-gray-100 shadow-lg p-4">
-            {faqDataBilingual.criminalLaw.map((item, index) => (
-              <Accordion key={index} item={item} lang={lang} />
-            ))}
-          </div>
+        {/* LEY CIVIL */}
+        <div className="mb-16">
+          <SectionTitle title={t('sections.civilLaw')} />
+          {faqDataBilingual.civilLaw.map((item, index) => (
+            <Accordion key={index} item={item} lang={lang} />
+          ))}
         </div>
 
-        <hr className="my-10" />
-
-        {/* Ley Familiar / Family Law */}
-        <div className="mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 border-b-4 border-[#B2904D] pb-2">
-            {t('sections.familyLaw')}
-          </h2>
-          <div className="space-y-4 rounded-xl border border-gray-100 shadow-lg p-4">
-            {faqDataBilingual.familyLaw.map((item, index) => (
-              <Accordion key={index} item={item} lang={lang} />
-            ))}
-          </div>
+        {/* LEY CRIMINAL */}
+        <div className="mb-16">
+          <SectionTitle title={t('sections.criminalLaw')} />
+          {faqDataBilingual.criminalLaw.map((item, index) => (
+            <Accordion key={index} item={item} lang={lang} />
+          ))}
         </div>
 
-        <hr className="my-10" />
-        
-        {/* Ley de Inmigración / Immigration Law */}
-        <div className="mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 border-b-4 border-[#B2904D] pb-2">
-            {t('sections.immigrationLaw')}
-          </h2>
-          <div className="space-y-4 rounded-xl border border-gray-100 shadow-lg p-4">
-            {faqDataBilingual.immigrationLaw.map((item, index) => (
-              <Accordion key={index} item={item} lang={lang} />
-            ))}
-          </div>
+        {/* LEY FAMILIAR */}
+        <div className="mb-16">
+          <SectionTitle title={t('sections.familyLaw')} />
+          {faqDataBilingual.familyLaw.map((item, index) => (
+            <Accordion key={index} item={item} lang={lang} />
+          ))}
         </div>
-
-        <hr className="my-10" />
         
-        {/* Ley de Seguros / Insurance Law */}
-        <div className="mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 border-b-4 border-[#B2904D] pb-2">
-            {t('sections.insuranceLaw')}
-          </h2>
-          <div className="space-y-4 rounded-xl border border-gray-100 shadow-lg p-4">
-            {faqDataBilingual.insuranceLaw.map((item, index) => (
-              <Accordion key={index} item={item} lang={lang} />
-            ))}
-          </div>
+        {/* LEY INMIGRACIÓN */}
+        <div className="mb-16">
+          <SectionTitle title={t('sections.immigrationLaw')} />
+          {faqDataBilingual.immigrationLaw.map((item, index) => (
+            <Accordion key={index} item={item} lang={lang} />
+          ))}
+        </div>
+        
+        {/* LEY SEGUROS */}
+        <div className="mb-16">
+          <SectionTitle title={t('sections.insuranceLaw')} />
+          {faqDataBilingual.insuranceLaw.map((item, index) => (
+            <Accordion key={index} item={item} lang={lang} />
+          ))}
         </div>
 
       </div>
       
-      {/* Contact Section */}
-      <section className="bg-gray-100 py-16">
-        <div className="container mx-auto px-4">
-            <div className="text-center mb-10">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                    {t('contact.title1').split(' ').map((word, index) => (
-                        <React.Fragment key={index}>
-                            {word}
-                            {' '}
-                        </React.Fragment>
-                    ))}
-                    <span className="text-[#B2904D]">{t('contact.title2')}</span>
-                </h2>
-                <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-                    {t('contact.subtitle')}
-                </p>
+      {/* --- CONTACT SECTION --- */}
+      <section className="relative py-24 z-10 border-t border-white/5 bg-gradient-to-b from-[#001540] to-[#000a20]">
+        <div className="container mx-auto px-4 max-w-4xl text-center">
+            
+            <div className="mb-12">
+              <h2 className="text-4xl md:text-5xl font-thin text-white mb-4 drop-shadow-sm">
+                  {t('contact.title1')} <span className="font-bold text-[#B2904D] drop-shadow-[0_0_15px_rgba(178,144,77,0.4)]">{t('contact.title2')}</span>
+              </h2>
+              <p className="text-blue-100/60 font-light text-lg">
+                  {t('contact.subtitle')}
+              </p>
             </div>
             
-            <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-2xl">
-                <ContactForm /> 
+            {/* Formulario flotando limpio */}
+            <div className="relative z-20 text-left">
+               <ContactForm /> 
             </div>
+
         </div>
       </section>
 
