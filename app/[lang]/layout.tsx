@@ -143,6 +143,21 @@ export default async function LangLayout({ children, params }: Props) {
   return (
     <html lang={htmlLang} suppressHydrationWarning>
       <head>
+        {/* 0. GOOGLE TAG MANAGER */}
+        <Script
+          id="google-tag-manager"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+              })(window,document,'script','dataLayer','GTM-N4CR652Z');
+            `,
+          }}
+        />
+
         {/* 1. SCHEMA ORG GLOBAL - ORGANIZATION ENTITY */}
         <Script
           id="schema-org-global"
@@ -154,7 +169,7 @@ export default async function LangLayout({ children, params }: Props) {
         {/* 2. GOOGLE ANALYTICS (GA4) */}
         <Script
           async
-          src="https://www.googletagmanager.com/gtag/js?id=G-V5F8J8QMZ4"
+          src="https://www.googletagmanager.com/gtag/js?id=G-HXCF6PPB4V"
           strategy="afterInteractive"
         />
         <Script
@@ -165,7 +180,7 @@ export default async function LangLayout({ children, params }: Props) {
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-V5F8J8QMZ4'); 
+              gtag('config', 'G-HXCF6PPB4V'); 
             `,
           }}
         />
@@ -208,10 +223,21 @@ export default async function LangLayout({ children, params }: Props) {
       </head>
       
       <body suppressHydrationWarning>
+        {/* GTM noscript fallback */}
         <noscript>
-          <img 
-            height="1" 
-            width="1" 
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-N4CR652Z"
+            height="0"
+            width="0"
+            style={{ display: 'none', visibility: 'hidden' }}
+          />
+        </noscript>
+
+        {/* Meta Pixel noscript fallback */}
+        <noscript>
+          <img
+            height="1"
+            width="1"
             style={{ display: 'none' }}
             src="https://www.facebook.com/tr?id=1679590710105917&ev=PageView&noscript=1"
             alt=""
