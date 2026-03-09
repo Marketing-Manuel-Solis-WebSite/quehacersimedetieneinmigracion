@@ -9,6 +9,7 @@ import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-
 import { Outfit } from 'next/font/google'
 import { usePathname } from 'next/navigation'
 import { track } from '@vercel/analytics/react' // 👈 Importamos track
+import { trackFullConversion } from '../lib/tracking' // Fase 3 & 4: Tracking de conversiones
 import { officesPhoneMap, DEFAULT_PHONE, DEFAULT_PHONE_LINK } from './officesPhoneMap'
 
 const font = Outfit({ 
@@ -71,7 +72,11 @@ export default function HeaderProfessional() {
       page: pathname || 'unknown',
       timestamp: new Date().toISOString()
     });
-    console.log(`Event tracked: Call Click on ${phoneNumber}`);
+
+    // FASE 3 & 4: DataLayer push (GTM) + Flight Check (tracking propio)
+    trackFullConversion('phone_click', 'header_phone_button', {
+      phone_number: phoneNumber,
+    });
   };
 
   const callText = language === 'es' ? 'Llámanos para una consulta:' : 'Call for a consultation:';

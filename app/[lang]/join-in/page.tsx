@@ -8,6 +8,7 @@ import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { User, Phone, Mail, CheckCircle2, ShieldCheck, Zap, XCircle } from 'lucide-react';
 import { Outfit } from 'next/font/google';
 import { track } from '@vercel/analytics/react'; // 1. Importación para Analytics
+import { trackFullConversion } from '../../lib/tracking'; // Fase 3 & 4: Tracking de conversiones
 
 // --- CONFIGURACIÓN DE FUENTE Y COLORES ---
 const font = Outfit({ subsets: ['latin'], weight: ['100', '300', '400', '500', '700'] });
@@ -264,12 +265,22 @@ export default function JoinInPage() {
             });
 
             if (response.ok) {
-                
+
                 // 2. TRACKING DEL EVENTO PERSONALIZADO "Join In Clicks"
                 track('Join In Clicks', {
                     location: 'join_in_page',
                     language: lang,
                     timestamp: new Date().toISOString()
+                });
+
+                // FASE 3 & 4: DataLayer push (GTM) + Flight Check (tracking propio)
+                trackFullConversion('form_submit', 'join_in_form', {
+                    form_type: 'registration',
+                });
+
+                // FASE 3: qualified_lead - Lead calificado tras registro exitoso
+                trackFullConversion('qualified_lead', 'join_in_qualified', {
+                    form_type: 'registration',
                 });
 
                 setSubmitStatus('success');

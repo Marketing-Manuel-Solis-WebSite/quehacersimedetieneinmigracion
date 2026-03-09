@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { track } from '@vercel/analytics/react'; // 1. Importar track de Vercel
+import { trackFullConversion } from '../lib/tracking'; // Fase 3 & 4: Tracking de conversiones
 
 export default function WhatsAppButton() {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -36,6 +37,9 @@ export default function WhatsAppButton() {
         'event_label': 'whatsapp_button'
       });
     }
+
+    // FASE 3 & 4: DataLayer push (GTM) + Flight Check (tracking propio)
+    trackFullConversion('whatsapp_click', 'whatsapp_cta');
   };
 
   // Mensaje del Tooltip: Usamos el mensaje del cliente si existe, si no, uno por defecto
